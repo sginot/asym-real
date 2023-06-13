@@ -1,8 +1,6 @@
 # Asymmetry and bite force study in Schistocerca gregaria
 # Data loading, cleaning and exploration
 
-setwd("Bureau/asym_real/")
-
 # Required packages:
 source(file = "Rfunctions1.txt")
 library(scales)
@@ -108,6 +106,9 @@ head_l <- dat$head.l
 head_h <- dat$head.h
 
 bf <- dat$max_bf
+bf2 <- dat$bf.max
+mbf <- dat$mean_bf
+mbf2 <- dat$bf.mean
 
 #-------------------------------------------------------------------------------
 
@@ -136,6 +137,8 @@ plot(shapes[,1,],
 plot(shapes[,3,],
      shapes[,2,],
      asp = 1)
+
+#plot3d(shapes[,,1])
 
 #-------------------------------------------------------------------------------
 # Checking for correlations
@@ -174,8 +177,10 @@ cor.test(csiz.av, PC2.av)
 
 plot(PC1.av,
      PC2.av,
-     pch = c(15, 17)[sex])
+     pch = c(15, 17)[sex],
+     asp = 1)
 
-head_h
+cor.test(csiz.av, bf)
+cor.test(PC1.av, bf)
+cor.test(PC2.av, bf)
 
-cor.test()
