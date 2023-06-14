@@ -173,10 +173,126 @@ summary(aov(lm(decomp_asym$matshp ~
                        asym_mandi$indiv.fac.mirror * asym_head$mirror.fac)))
 
 # Make visual representation
+mshp_real <- pA$mshape
 
 mshp <- decomp_asym$Procrustes$mshape
 
+LM_sdev <- matrix(apply(X = mat_shps, 
+                        MARGIN = 2, 
+                        FUN = sd),
+                  ncol = 3,
+                  byrow = T)
 
+pdf(file = "Shape_variation_components.pdf",
+    width = 7,
+    height = 10)
+
+layout(mat = matrix(1:12, 
+                    ncol = 3, 
+                    byrow = T))
+
+par(mar = c(2, 2.5, 2.5, 2))
+
+plot(mshp_real[, 1],
+     mshp_real[, 2], 
+     axes = F, 
+     xlab = "", 
+     ylab = "",
+     asp = 1,
+     pch = 21,
+     bg = alpha("gray",
+                alpha = LM_sdev[ ,1] / max(LM_sdev[ ,1])),
+     lwd = 2,
+     cex = 2)
+
+for (i in 1:35) {
+        
+        lines(x = c(mshp_real[i, 1] + 2*LM_sdev[i, 1], 
+                    mshp_real[i, 1] - 2*LM_sdev[i, 1]), 
+              y = rep(mshp_real[i, 2], 2),
+              col = "firebrick",
+              lwd = 2)
+}
+
+mtext("Posterior <=> Anterior", 
+      side = 3, 
+      col = "firebrick", 
+      line = 1,
+      font = 2)
+
+mtext("Right <=> Left", 
+      side = 2, 
+      col = "black", 
+      line = 1,
+      font = 2)
+
+plot(mshp_real[, 2],
+     mshp_real[, 3], 
+     axes = F, 
+     xlab = "", 
+     ylab = "",
+     asp = 1,
+     pch = 21,
+     bg = alpha("gray",
+                alpha = LM_sdev[ ,2] / max(LM_sdev[ ,2])),
+     lwd = 2,
+     cex = 2)
+
+for (i in 1:35) {
+        
+        lines(x = c(mshp_real[i, 2] + 2*LM_sdev[i, 2], 
+                    mshp_real[i, 2] - 2*LM_sdev[i, 2]), 
+              y = rep(mshp_real[i, 3], 2),
+              col = "forestgreen",
+              lwd = 2)
+}
+
+mtext("Right <=> Left", 
+      side = 3, 
+      col = "forestgreen", 
+      line = 1,
+      font = 2)
+
+mtext("Ventral <=> Dorsal", 
+      side = 2, 
+      col = "black", 
+      line = 1,
+      font = 2)
+
+plot(mshp_real[, 3],
+     mshp_real[, 1], 
+     axes = F, 
+     xlab = "", 
+     ylab = "",
+     asp = 1,
+     pch = 21,
+     bg = alpha("gray",
+               alpha = LM_sdev[ ,3] / max(LM_sdev[ ,3])),
+     lwd = 2,
+     cex = 2)
+
+for (i in 1:35) {
+        
+        lines(x = c(mshp_real[i, 3] + 2*LM_sdev[i, 3], 
+                    mshp_real[i, 3] - 2*LM_sdev[i, 3]), 
+              y = rep(mshp_real[i, 1], 2),
+              col = "blue",
+              lwd = 2)
+}
+
+mtext("Ventral <=> Dorsal", 
+      side = 3, 
+      col = "blue", 
+      line = 1,
+      font = 2)
+
+mtext("Posterior <=> Anterior", 
+      side = 2, 
+      col = "black", 
+      line = 1,
+      font = 2)
+
+par(mar = c(2, 0.5, 2, 0.5))
 # For INTER INDIVIDUAL VARIATION
 
 MSx <- MSy <- MSz <- rep(NA, 35)
@@ -217,13 +333,10 @@ plot(decomp_asym$Procrustes$mshape[,1],
                 alpha =  MSx / max(MSx)),
      lwd = 2,
      xlab = "",
-     ylab = "Right <=> Left")
+     ylab = "", 
+     axes = F)
 
-mtext("Posterior <=> Anterior", 
-      side = 1, 
-      col = "firebrick", 
-      line = 3,
-      font = 2)
+#mtext("Posterior <=> Anterior", side = 1, col = "firebrick", line = 3, font = 2)
 
 plot(decomp_asym$Procrustes$mshape[,2],
      decomp_asym$Procrustes$mshape[,3],
@@ -233,14 +346,11 @@ plot(decomp_asym$Procrustes$mshape[,2],
      bg = alpha("forestgreen",
                 alpha =  MSy / max(MSy)),
      lwd = 2,
-     ylab = "Ventral <=> Dorsal",
-     xlab = "")
+     ylab = "",
+     xlab = "",
+     axes = F)
 
-mtext("Right <=> Left", 
-      side = 1, 
-      col = "forestgreen", 
-      line = 3,
-      font = 2)
+#mtext("Right <=> Left", side = 1, col = "forestgreen", line = 3, font = 2)
 
 plot(decomp_asym$Procrustes$mshape[,3],
      decomp_asym$Procrustes$mshape[,1],
@@ -248,16 +358,14 @@ plot(decomp_asym$Procrustes$mshape[,3],
      pch = 21,
      cex = 2,
      bg = alpha("blue",
-                alpha =  MSz / max(MSz)),
+                alpha =  MSz / max(MSz) / 2), 
+     #Divided by 2 because of overlapping landmarks (left right)
      lwd = 2,
      xlab = "",
-     ylab = "Posterior <=> Anterior")
+     ylab = "",
+     axes = F)
 
-mtext("Ventral <=> Dorsal", 
-      side = 1, 
-      col = "blue", 
-      line = 3,
-      font = 2)
+#mtext("Ventral <=> Dorsal", side = 1, col = "blue", line = 3,font = 2)
 
 # For DIRECTIONAL ASYMMETRY
 
@@ -299,13 +407,10 @@ plot(decomp_asym$Procrustes$mshape[,1],
                 alpha =  MSx / max(MSx)),
      lwd = 2,
      xlab = "",
-     ylab = "Right <=> Left")
+     ylab = "",
+     axes = F)
 
-mtext("Posterior <=> Anterior", 
-      side = 1, 
-      col = "firebrick", 
-      line = 3,
-      font = 2)
+#mtext("Posterior <=> Anterior", side = 1, col = "firebrick",line = 3,font = 2)
 
 plot(decomp_asym$Procrustes$mshape[,2],
      decomp_asym$Procrustes$mshape[,3],
@@ -315,14 +420,15 @@ plot(decomp_asym$Procrustes$mshape[,2],
      bg = alpha("forestgreen",
                 alpha =  MSy / max(MSy)),
      lwd = 2,
-     ylab = "Ventral <=> Dorsal",
-     xlab = "")
+     ylab = "",
+     xlab = "",
+     axes = F)
 
-mtext("Right <=> Left", 
-      side = 1, 
-      col = "forestgreen", 
-      line = 3,
-      font = 2)
+#mtext("Right <=> Left", 
+#      side = 1, 
+#      col = "forestgreen", 
+#      line = 3,
+#      font = 2)
 
 plot(decomp_asym$Procrustes$mshape[,3],
      decomp_asym$Procrustes$mshape[,1],
@@ -330,16 +436,17 @@ plot(decomp_asym$Procrustes$mshape[,3],
      pch = 21,
      cex = 2,
      bg = alpha("blue",
-                alpha =  MSz / max(MSz)),
+                alpha =  MSz / max(MSz) / 2),
      lwd = 2,
      xlab = "",
-     ylab = "Posterior <=> Anterior")
+     ylab = "",
+     axes = F)
 
-mtext("Ventral <=> Dorsal", 
-      side = 1, 
-      col = "blue", 
-      line = 3,
-      font = 2)
+#mtext("Ventral <=> Dorsal", 
+#      side = 1, 
+#      col = "blue", 
+#      line = 3,
+#      font = 2)
 
 # For FLUCTUATING ASYMMETRY
 
@@ -381,13 +488,14 @@ plot(decomp_asym$Procrustes$mshape[,1],
                 alpha =  MSx / max(MSx)),
      lwd = 2,
      xlab = "",
-     ylab = "Right <=> Left")
+     ylab = "",
+     axes = F)
 
-mtext("Posterior <=> Anterior", 
-      side = 1, 
-      col = "firebrick", 
-      line = 3,
-      font = 2)
+#mtext("Posterior <=> Anterior", 
+#      side = 1, 
+#      col = "firebrick", 
+#      line = 3,
+#      font = 2)
 
 plot(decomp_asym$Procrustes$mshape[,2],
      decomp_asym$Procrustes$mshape[,3],
@@ -397,14 +505,15 @@ plot(decomp_asym$Procrustes$mshape[,2],
      bg = alpha("forestgreen",
                 alpha =  MSy / max(MSy)),
      lwd = 2,
-     ylab = "Ventral <=> Dorsal",
-     xlab = "")
+     ylab = "",
+     xlab = "",
+     axes = F)
 
-mtext("Right <=> Left", 
-      side = 1, 
-      col = "forestgreen", 
-      line = 3,
-      font = 2)
+#mtext("Right <=> Left", 
+#      side = 1, 
+#      col = "forestgreen", 
+#      line = 3,
+#      font = 2)
 
 plot(decomp_asym$Procrustes$mshape[,3],
      decomp_asym$Procrustes$mshape[,1],
@@ -412,14 +521,44 @@ plot(decomp_asym$Procrustes$mshape[,3],
      pch = 21,
      cex = 2,
      bg = alpha("blue",
-                alpha =  MSz / max(MSz)),
+                alpha =  MSz / max(MSz) / 2),
      lwd = 2,
      xlab = "",
-     ylab = "Posterior <=> Anterior")
+     ylab = "",
+     axes = F)
 
 mtext("Ventral <=> Dorsal", 
       side = 1, 
       col = "blue", 
       line = 3,
       font = 2)
+
+par(fig = c(0.0, 1, 0,0.26), 
+    new = T)
+
+plot(1, 1, 
+     axes = F, 
+     frame.plot = T, 
+     type = "n",
+     main = "Fluctuating asymmetry")
+
+par(fig = c(0.0, 1, 0.24,0.51), 
+    new = T)
+
+plot(1, 1, 
+     axes = F, 
+     frame.plot = T, 
+     type = "n",
+     main = "Directional asymmetry")
+
+par(fig = c(0.0, 1, 0.49, 0.76), 
+    new = T)
+
+plot(1, 1, 
+     axes = F, 
+     frame.plot = T, 
+     type = "n",
+     main = "Inter-individual variation")
+
+dev.off()
 
