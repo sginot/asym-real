@@ -66,7 +66,7 @@ arr <- arr[-c(8:10),,]
 
 arr <- arr[,,-grep("0497",
                    x = name)] # Specimen 0497 was an outlier, probably another species
-dat <- dat[-which(dat$ID == 497),]
+dat <- dat[-which(dat$ID == "497"),]
 
 name <- name[-grep("0497",
                    x = name)]
@@ -119,7 +119,8 @@ pca <- prcomp(mat_shps)
 var_exp <- pca$sdev^2 / sum(pca$sdev^2) * 100
 
 plot(pca$x[,1:2], 
-     pch = c(15, 17)[as.factor(replic)])
+     pch = c(15, 17)[as.factor(replic)],
+     asp = 1)
 
 for (i in 1:length(replic)) {
   

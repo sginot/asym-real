@@ -36,16 +36,16 @@ DA <- decomp_asym$M[, 3]
 FA <- decomp_asym$M[, 1]
 
 cor.test(csiz.av, FA)
-cor.test(bf, FA)
+cor.test(bf2, FA)
 
 cor.test(csiz.av, DA)
-cor.test(bf, DA)
+cor.test(bf2, DA)
 
-linear_mod <- lm(bf ~ DA)
+linear_mod <- lm(bf2 ~ DA)
 
 DA_sq <- DA^2
 
-quadratic_mod <- lm(bf ~ DA + DA_sq)
+quadratic_mod <- lm(bf2 ~ DA + DA_sq)
 
 summary(quadratic_mod)
 
@@ -56,7 +56,7 @@ newvals <- seq(-0.2,
 pred_quadra <- predict(quadratic_mod, newdata = data.frame(DA = newvals,
                                                            DA_sq = newvals^2))
 
-plot(DA, bf)
+plot(DA, bf2)
 lines(newvals, pred_quadra)
 
 #-------------------------------------------------------------------------------
@@ -91,15 +91,25 @@ for (i in 1:length(TA)) {
 }
 
 
-linear_mod2 <- lm(bf ~ TA)
+linear_mod2 <- lm(bf2 ~ TA)
 
 summary(linear_mod2)
 
 TA_sq <- TA^2
 
-quadratic_mod2 <- lm(bf ~ TA + TA_sq)
+quadratic_mod2 <- lm(bf2 ~ TA + TA_sq)
 
 summary(quadratic_mod2)
+
+newvals <- seq(0, 
+               0.2,
+               by = 0.001)
+
+pred_quadra2 <- predict(quadratic_mod2, newdata = data.frame(TA = newvals,
+                                                           TA_sq = newvals^2))
+
+plot(TA, bf2)
+lines(newvals, pred_quadra2)
 
 
 # Mandibular LMs are 16:33 (because landmarks 8:10 were removed previously)
@@ -120,15 +130,24 @@ plot(asym_mandi$PCA.asym$x[, 1:2])
 DA_mandi <- asym_mandi$M[, 3]
 FA_mandi <- asym_mandi$M[, 1]
 
-linear_mod3 <- lm(bf ~ DA_mandi)
+linear_mod3 <- lm(bf2 ~ DA_mandi)
 
 summary(linear_mod3)
 
 DA_mandi_sq <- DA_mandi^2
 
-quadratic_mod3 <- lm(bf ~ DA_mandi + DA_mandi_sq)
+quadratic_mod3 <- lm(bf2 ~ DA_mandi + DA_mandi_sq)
 
 summary(quadratic_mod3)
+
+newvals <- seq(-0.2, 
+               0.2,
+               by = 0.001)
+
+pred_quadra3 <- predict(quadratic_mod3, newdata = data.frame(DA_mandi = newvals,
+                                                             DA_mandi_sq = newvals^2))
+plot(DA_mandi, bf2)
+lines(newvals, pred_quadra3)
 
 # Non-mandibular LMs are -c(16:33)
 
@@ -148,17 +167,27 @@ plot(asym_head$PCA.asym$x[, 1:2])
 DA_head <- asym_head$M[, 3]
 FA_head <- asym_head$M[, 1]
 
-
-linear_mod4 <- lm(bf ~ DA_head)
+linear_mod4 <- lm(bf2 ~ DA_head)
 
 summary(linear_mod4)
 
 DA_head_sq <- DA_head^2
 
-quadratic_mod4 <- lm(bf ~ DA_head + DA_head_sq)
+quadratic_mod4 <- lm(bf2 ~ DA_head + DA_head_sq)
 
 summary(quadratic_mod4)
 
+newvals <- seq(-0.2, 
+               0.2,
+               by = 0.001)
+
+pred_quadra4 <- predict(quadratic_mod4, newdata = data.frame(DA_head = newvals,
+                                                             DA_head_sq = newvals^2))
+plot(DA_head, bf2)
+
+lines(newvals, pred_quadra4)
+
+summary(lm(bf2 ~ FA_head))
 #-------------------------------------------------------------------------------
 # (M)ANOVAs for significance of global / partial / individual coordinate asym
 
