@@ -1,0 +1,39 @@
+LM_Description,Name
+Middle point of the junction between frons and clypeus,mEn
+Middle point of the junction between clypeus and labrum,mCLn
+Right-most point of the junction between clypeus and labrum,lCLr
+Right side crossing between suboccular line and junction between frons and clypeus,eSOEr
+Right side dorsal starting point of the suboccular line,bOnr
+Middle of the right occulus (in front of the eye),mOcr
+Middle of the lower side of the right antenna joint,Agr
+Right side ventral end of the occipital ridge line,eOcpr
+Posterior end of the occipital midline,mOcp
+Left side ventral end of the occipital ridge line,eOcpl
+Middle of the left occulus (in front of the eye),mOcL
+Left side dorsal starting point of the suboccular line,bOnl
+Middle of the lower side of the left antenna joint,Agl
+Left side crossing between suboccular line and junction between frons and clypeus,eSOEl
+Left-most point of the junction between clypeus and labrum,lCLl
+Middle of the median ocellus,mOm
+Right crossing point between the tentorial bridge and posterior tentorial arm,CTTdvr
+Left crossing point between the tentorial bridge and posterior tentorial arm,CTTdvl
+Right posterior mandible condyle,dMGr
+Left posterior mandible condyle,dMGl
+Tip of first right incisivus,IM1r
+Tip of second right incisivus,IM2r
+Tip of third right incisivus,IM3r
+Tip of first left incisivus,IM1l
+Tip of second right incisivus,IM2l
+Tip of third left incisivus,IM3l
+Right anterior mandible condyle,fMGr
+Left anterior mandible condyle,fMGl
+Anterior insertion point of right mandible abductor muscle,fAMAbr
+Posterior insertion point of right mandible abductor muscle,dAMAbr
+Anterior insertion point of right mandible adductor muscle,fAMAdr
+Posterior insertion point of right mandible adductor muscle,dAMAdr
+Anterior insertion point of left mandible abductor muscle,fAMAbl
+Posterior insertion point of left mandible abductor muscle,dAMAbl
+Anterior insertion point of left mandible adductor muscle,fAMAdl
+Posterior insertion point of left mandible adductor muscle,dAMAdl
+Dorso-sagittal most point of the right eye's edge,topEyer
+Dorso-sagittal most point of the left eye's edge,topEyel

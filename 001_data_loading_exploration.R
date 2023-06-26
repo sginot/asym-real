@@ -157,6 +157,17 @@ for (i in 1:length(name)) {
 
 ID <- as.factor(ID)
 
+av_A <- array(data = NA,
+              dim = c(dim(shapes)[1:2], 
+                      dim(shapes)[3]/length(unique(replic))))
+
+for (i in 1:length(levels(ID))) {
+  
+  ind <- levels(ID)[i]
+  av_A[,,i] <- mshape(shapes[,, which(ID == ind)])
+  
+}
+
 csiz.av <- tapply(X = csiz, 
                   INDEX = ID,
                   FUN = mean)
