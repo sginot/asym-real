@@ -189,6 +189,37 @@ lines(newvals, pred_quadra4)
 
 summary(lm(bf2 ~ FA_head))
 #-------------------------------------------------------------------------------
+# Geomorph bilat.symmetry function
+land_pairs <- list()
+land_pairs[[1]] <- c(3, 12)
+land_pairs[[2]] <- c(4, 11)
+land_pairs[[3]] <- c(5, 9)
+land_pairs[[4]] <- c(6, 8)
+land_pairs[[5]] <- c(7, 10)
+land_pairs[[6]] <- c(3, 12)
+land_pairs[[7]] <- c(14, 15)
+land_pairs[[8]] <- c(16, 17)
+land_pairs[[9]] <- c(18, 21)
+land_pairs[[10]] <- c(19, 22)
+land_pairs[[11]] <- c(20, 23)
+land_pairs[[12]] <- c(24, 25)
+land_pairs[[13]] <- c(26, 30)
+land_pairs[[14]] <- c(27, 31)
+land_pairs[[15]] <- c(28, 32)
+land_pairs[[16]] <- c(29, 33)
+land_pairs[[17]] <- c(34, 35)
+
+land_pairs <- matrix(unlist(land_pairs), 
+                     ncol = 2, 
+                     byrow = T)
+
+bilat_sym <- bilat.symmetry(A = shapes, 
+                            ind = ID, 
+                            replicate = replic,
+                            object.sym = T,
+                            land.pairs = land_pairs)
+
+
 # (M)ANOVAs for significance of global / partial / individual coordinate asym
 
 summary(manova(lm(prcomp(asym_head$matshp)$x[,1:50] ~ 
