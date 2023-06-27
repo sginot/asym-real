@@ -207,6 +207,7 @@ return(mat)
 M <- congruence_coef(av_A)
 
 #Geomorph much simpler tests
+
 modul_test_1 <- modularity.test(A = A, 
                                 partition.gp = DF[,3],
                                 iter = 999,
@@ -227,6 +228,11 @@ modul_test_4 <- modularity.test(A = A,
                                 iter = 999,
                                 CI = T)
 
+modul_compar <- compare.CR(modul_test_1, 
+                           modul_test_2, 
+                           modul_test_3, 
+                           modul_test_4)
+
 integ_test_1 <- integration.test(A = A, 
                                 partition.gp = DF[,3],
                                 iter = 999)
@@ -243,3 +249,21 @@ integ_test_4 <- integration.test(A = A,
                                 partition.gp = DF[,6],
                                 iter = 999)
 
+
+newpart <- DF[,5]
+newpart[which(newpart == 1)] <- NA
+
+integ_test_5 <- integration.test(A = A, 
+                                 partition.gp = newpart,
+                                 iter = 999)
+
+A1 <- A[which(DF[,5] == 2),,]
+A2 <- A[which(DF[,5] == 3),,]
+
+tbpls <- two.b.pls(A1 = A1,
+                   A2 = A2)
+
+integ_compar <- compare.pls(integ_test_1, 
+                            integ_test_2, 
+                            integ_test_3, 
+                            integ_test_4)
