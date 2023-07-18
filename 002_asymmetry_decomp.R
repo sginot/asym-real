@@ -188,6 +188,23 @@ plot(DA_head, bf2)
 lines(newvals, pred_quadra4)
 
 summary(lm(bf2 ~ FA_head))
+
+#-------------------------------------------------------------------------------
+#Coefficient of variation analysis (compare with Pelabon & Hansen 2008)
+
+CVTA <- sd(TA, na.rm = T)/mean(TA, na.rm = T)
+
+CVDA <- sd(DA, na.rm = T)/mean(abs(DA), na.rm = T)
+
+CVBF <- sd(bf, na.rm = T)/mean(bf, na.rm = T)
+
+CVBF2 <- sd(bf2, na.rm = T)/mean(bf2, na.rm = T)
+
+CVHL <- sd(head_l, na.rm = T)/mean(head_l, na.rm = T)
+
+CVsiz <- sd(csiz, na.rm = T)/mean(csiz, na.rm = T)
+
+
 #-------------------------------------------------------------------------------
 # Geomorph bilat.symmetry function
 land_pairs <- list()
