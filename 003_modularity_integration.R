@@ -10,6 +10,7 @@ library(scales)
 source("../repo/001_functions.R")
 source("../repo/002_asym_components.R")
 source("Rfunctions1.txt")
+palette(palette.colors(palette = "Okabe-Ito"))
 
 #-------------------------------------------------------------------------------
 # Load landöark template
@@ -71,6 +72,12 @@ df_modul_models <- data.frame(name = names_LM,
 #-------------------------------------------------------------------------------
 # Plot the different models
 
+input_folder <- "Figures/"
+
+pdf(file = paste(input_folder, "Module_Models.pdf"),
+    width = 6, 
+    height = 9)
+
 layout(matrix(c(1:4), 
               ncol = 2,
               byrow = T))
@@ -79,35 +86,37 @@ par(mar = c(1, 2, 4, 1))
 
 plot(shapes[,2:3,1], 
      asp = 1, 
-     pch = 20, 
+     pch = 21, 
      cex = 2,
-     col = head_mand[-c(8:10)],
+     bg = head_mand[-c(8:10)],
      main = "Head-Mandibles",
      axes = F)
 
 plot(shapes[,2:3,1], 
      asp = 1, 
-     pch = 20, 
+     pch = 21, 
      cex = 2,
-     col = head_mand_asym[-c(8:10)],
+     bg = head_mand_asym[-c(8:10)],
      main = "Head-Mandibles-Asymmetric",
      axes = F)
 
 plot(shapes[,2:3,1], 
      asp = 1, 
-     pch = 20, 
+     pch = 21, 
      cex = 2,
-     col = head_mand_sens[-c(8:10)],
+     bg = head_mand_sens[-c(8:10)],
      main = "Head-Mandibles-Sensory",
      axes = F)
 
 plot(shapes[,2:3,1], 
      asp = 1, 
-     pch = 20, 
+     pch = 21, 
      cex = 2,
-     col = head_mand_asym_sens[-c(8:10)],
+     bg = head_mand_asym_sens[-c(8:10)],
      main = "Head-Mandibles-Asym-Sensory",
      axes = F)
+
+dev.off()
 
 #-------------------------------------------------------------------------------
 #Test run EMMLi
