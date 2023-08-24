@@ -70,9 +70,97 @@ df_modul_models <- data.frame(name = names_LM,
                               head_mand_asym_sens = head_mand_asym_sens)
 
 #-------------------------------------------------------------------------------
-# Plot the different models
 
 input_folder <- "Figures/"
+
+#Plot the different views of the landmarks configuration, with lines to show
+# the main structures.
+
+template <- shapes[,,1]
+  
+oculeyeR <- c(6, 7, 34)
+oculeyeL <- c(8, 10, 35)
+
+mandiR <- c(16, 18:20, 28, 29, 24, 26, 27)
+mandiL <- c(17, 21:23, 32, 33, 25, 31, 30)
+
+pdf(file = paste(input_folder, "LM_config.pdf"),
+    width = 12, 
+    height = 6)
+
+layout(matrix(c(1:3), 
+              ncol = 3,
+              byrow = T))
+
+par(mar = c(1, 2, 4, 1))
+
+plot(template[,c(1,2)], 
+     asp = 1, 
+     pch = 21, 
+     cex = 2,
+     bg = "firebrick",
+     main = "Dorsal view",
+     axes = F)
+
+text(template[,c(1,2)], 
+     labels = c(1:35), 
+     pos = c(rep(1,10), 
+             3, 2, 1, 2, 2, 1, 1, 1, 3, 3,
+             2, 3, 1, 4, 4, 4, 2, 3, 1, 4, 
+             2, 1, 3, 1, 1))
+
+#polygon(template[oculeyeL,
+#                 c(1,2)])
+#polygon(template[oculeyeR,
+#                 c(1,2)])
+#polygon(template[mandiL,
+#                 c(1,2)])
+#polygon(template[mandiR,
+#                 c(1,2)])
+
+plot(template[,c(2,3)], 
+     asp = 1, 
+     pch = 21, 
+     cex = 2,
+     bg = "forestgreen",
+     main = "Anterior view",
+     axes = F)
+
+text(template[,c(2,3)], 
+     labels = c(1:35), 
+     pos = c(rep(1,18),
+             4, 3, 1, 2, 2, 4, 2, 3, 1, 4, 1, 1, 3, 4, 1))
+
+#polygon(template[oculeyeL,
+#               c(2,3)])
+#polygon(template[oculeyeR,
+#                 c(2,3)])
+#polygon(template[mandiL,
+#                 c(2,3)])
+#(template[mandiR,
+#                 c(2,3)])
+
+
+plot(template[,c(1,3)], 
+     asp = 1, 
+     pch = 21, 
+     cex = 2,
+     bg = "navyblue",
+     main = "Lateral view",
+     axes = F)
+
+text(template[,c(1,3)], 
+     labels = c(1:35), 
+     pos = c(1,1,1,3,3,3,3,1,1,1,
+             2,1,1,4,2,3,1,1,1,1,
+             1,1,1,4,1,3,3,1,1,4,
+             1,1,1,1,1))
+
+dev.off()
+
+
+# Plot the different models
+
 
 pdf(file = paste(input_folder, "Module_Models.pdf"),
     width = 6, 
@@ -115,6 +203,11 @@ plot(shapes[,2:3,1],
      bg = head_mand_asym_sens[-c(8:10)],
      main = "Head-Mandibles-Asym-Sensory",
      axes = F)
+
+text(shapes[,2:3,1], 
+     labels = c(1:36), 
+     pos = c(rep(1,18),
+             4, 3, 1, 2, 2, 4, 2, 3, 1, 4, 1, 1, 3, 4, 1, 1))
 
 dev.off()
 
