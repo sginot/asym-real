@@ -7,6 +7,7 @@ library(geomorph)
 library(EMMLi)
 library(abind)
 library(scales)
+library(paleomorph)
 source("../repo/001_functions.R")
 source("../repo/002_asym_components.R")
 source("Rfunctions1.txt")
@@ -33,10 +34,10 @@ head_mand <- c(1, 1, 2, 1, 1, 1, 1, 1, 1, 1,
 #The mandibles (together as one module) = 2
 
 
-head_mand_sens <- c(1, 1, 2, 1, 3, 3, 3, 1, 1, 1,
-                    3, 3, 3, 1, 2, 3, 1, 1, 2, 2,
+head_mand_sens <- c(1, 1, 2, 1, 4, 4, 4, 1, 1, 1,
+                    4, 4, 4, 1, 2, 4, 1, 1, 2, 2,
                     2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-                    2, 2, 2, 2, 2, 2, 3, 3)
+                    2, 2, 2, 2, 2, 2, 4, 4)
 # Three modules: 
 #The head capsule = 1, 
 #The mandibles = 2, 
@@ -161,6 +162,7 @@ dev.off()
 
 # Plot the different models
 
+palette(c("bisque", "firebrick", "navyblue", "burlywood"))
 
 pdf(file = paste(input_folder, "Module_Models.pdf"),
     width = 6, 
@@ -172,7 +174,8 @@ layout(matrix(c(1:4),
 
 par(mar = c(1, 2, 4, 1))
 
-plot(shapes[,2:3,1], 
+plot(x = -template[,2],
+     y = template[,3],
      asp = 1, 
      pch = 21, 
      cex = 2,
@@ -180,7 +183,8 @@ plot(shapes[,2:3,1],
      main = "Head-Mandibles",
      axes = F)
 
-plot(shapes[,2:3,1], 
+plot(x = -template[,2],
+     y = template[,3],
      asp = 1, 
      pch = 21, 
      cex = 2,
@@ -188,7 +192,8 @@ plot(shapes[,2:3,1],
      main = "Head-Mandibles-Asymmetric",
      axes = F)
 
-plot(shapes[,2:3,1], 
+plot(x = -template[,2],
+     y = template[,3],
      asp = 1, 
      pch = 21, 
      cex = 2,
@@ -196,18 +201,14 @@ plot(shapes[,2:3,1],
      main = "Head-Mandibles-Sensory",
      axes = F)
 
-plot(shapes[,2:3,1], 
+plot(x = -template[,2],
+     y = template[,3],
      asp = 1, 
      pch = 21, 
      cex = 2,
      bg = head_mand_asym_sens[-c(8:10)],
      main = "Head-Mandibles-Asym-Sensory",
      axes = F)
-
-text(shapes[,2:3,1], 
-     labels = c(1:36), 
-     pos = c(rep(1,18),
-             4, 3, 1, 2, 2, 4, 2, 3, 1, 4, 1, 1, 3, 4, 1, 1))
 
 dev.off()
 
@@ -235,9 +236,12 @@ DF_3[, 2:6] <- apply(X = DF_3[, 2:6],
                      MARGIN = 2, 
                      FUN = as.numeric)
 
-cor_M <- cor(M) 
+cor_M <- cor(M)
+
+cong_M <- dotcorr(A)
 
 f <- "output_EMMLi_individual_coord.csv"
+f2 <- "output_EMMLi_LM_correl.csv"
 
 EMMLi(corr = as.data.frame(cor_M),
       N_sample = nrow(M),
@@ -247,10 +251,11 @@ EMMLi(corr = as.data.frame(cor_M),
 #Test here with correlation matrix between individual coordinates
 
 
-EMMLi(corr = as.data.frame(cor_M),
+EMMLi(corr = as.data.frame(cong_M),
       N_sample = nrow(M),
       mod = DF,
-      abs = T)
+      abs = T,
+      saveAs = f2)
 #Does not work, correlation must be between LANDMARKS, 
 #not individual coordinates
 
@@ -333,7 +338,8 @@ modul_test_4 <- modularity.test(A = A,
 modul_compar <- compare.CR(modul_test_1, 
                            modul_test_2, 
                            modul_test_3, 
-                           modul_test_4)
+                           modul_test_4,
+                           CR.null = T)
 
 integ_test_1 <- integration.test(A = A, 
                                 partition.gp = DF[,3],

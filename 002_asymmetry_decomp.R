@@ -23,6 +23,7 @@ plot(decomp_asym$PCA.sym$x[,1:2],
      asp = 1)
 
 plot(decomp_asym$PCA.asym$x[,1:2], 
+     asp = 1,
      xlim = c(-max(abs(decomp_asym$PCA.asym$x[, 1])), 
               0),
      ylim = c(-max(abs(decomp_asym$PCA.asym$x[, 2])), 
@@ -34,6 +35,9 @@ abline(h = 0,
 
 DA <- decomp_asym$M[, 3]
 FA <- decomp_asym$M[, 1]
+
+#-------------------------------------------------------------------------------
+# Testing for links between asym and size and asym and BF
 
 cor.test(csiz.av, FA)
 cor.test(bf2, FA)
@@ -57,9 +61,8 @@ pred_quadra <- predict(quadratic_mod, newdata = data.frame(DA = newvals,
                                                            DA_sq = newvals^2))
 
 plot(DA, bf2)
-lines(newvals, pred_quadra)
+lines(newvals, pred_quadra[,1])
 
-#-------------------------------------------------------------------------------
 # Check for mandibles only and check for effect of TA
 
 shpmirshp <- decomp_asym$Procrustes$rotated
@@ -101,16 +104,37 @@ quadratic_mod2 <- lm(bf2 ~ TA + TA_sq)
 
 summary(quadratic_mod2)
 
-newvals <- seq(0, 
+newvals2 <- seq(0, 
                0.2,
                by = 0.001)
 
-pred_quadra2 <- predict(quadratic_mod2, newdata = data.frame(TA = newvals,
-                                                           TA_sq = newvals^2))
+pred_quadra2 <- predict(quadratic_mod2, newdata = data.frame(TA = newvals2,
+                                                           TA_sq = newvals2^2))
 
 plot(TA, bf2)
-lines(newvals, pred_quadra2)
+lines(newvals2, pred_quadra2)
 
+#For FA
+
+linear_mod5 <- lm(bf2 ~ FA)
+
+summary(linear_mod5)
+
+FA_sq <- FA^2
+
+quadratic_mod5 <- lm(bf2 ~ FA + FA_sq)
+
+summary(quadratic_mod5)
+
+newvals5 <- seq(-0.2, 
+                0.2,
+                by = 0.001)
+
+pred_quadra5 <- predict(quadratic_mod5, newdata = data.frame(FA = newvals5,
+                                                             FA_sq = newvals5^2))
+
+plot(FA, bf2)
+lines(newvals5, pred_quadra5)
 
 # Mandibular LMs are 16:33 (because landmarks 8:10 were removed previously)
 
@@ -140,14 +164,15 @@ quadratic_mod3 <- lm(bf2 ~ DA_mandi + DA_mandi_sq)
 
 summary(quadratic_mod3)
 
-newvals <- seq(-0.2, 
+newvals3 <- seq(-0.3, 
                0.2,
                by = 0.001)
 
-pred_quadra3 <- predict(quadratic_mod3, newdata = data.frame(DA_mandi = newvals,
-                                                             DA_mandi_sq = newvals^2))
+pred_quadra3 <- predict(quadratic_mod3, 
+                        newdata = data.frame(DA_mandi = newvals3,
+                                             DA_mandi_sq = newvals3^2))
 plot(DA_mandi, bf2)
-lines(newvals, pred_quadra3)
+lines(newvals3, pred_quadra3)
 
 # Non-mandibular LMs are -c(16:33)
 
@@ -186,6 +211,7 @@ pred_quadra4 <- predict(quadratic_mod4, newdata = data.frame(DA_head = newvals,
 plot(DA_head, bf2)
 
 lines(newvals, pred_quadra4)
+abline(linear_mod4)
 
 summary(lm(bf2 ~ FA_head))
 
@@ -639,3 +665,226 @@ plot(1, 1,
 
 dev.off()
 
+#-------------------------------------------------------------------------------
+# Make lollipop plot for FA and DA components
+
+cols <- head_mand[-c(8:10)] 
+
+input_folder <- "Figures/"
+
+# FOR DA
+
+pdf(file = paste(input_folder, 
+                 "lollipopDA.pdf", 
+                 sep = ""),
+    width = 8,
+    height = 5)
+
+par(mar = c(1, 1, 4, 1))
+
+layout(matrix(1:2, ncol = 2))
+
+plot(bilat_sym$DA.component[,c(2,1),2], 
+     asp = 1,
+     axes = F,
+     xlab = "",
+     ylab = "",
+     pch = 21,
+     bg = cols,
+     cex = 2,
+     main = "<= Right-Left =>")
+
+for (i in 1:dim(mshp)[1]) {
+  lines(x = c(bilat_sym$DA.component[i, 2, 1], bilat_sym$DA.component[i, 2, 2]),
+        y = c(bilat_sym$DA.component[i, 1, 1], bilat_sym$DA.component[i, 1, 2]),
+        col = "black",
+        lwd = 3)
+}
+
+plot(x = -bilat_sym$DA.component[,3,1], 
+     y = bilat_sym$DA.component[,2,1],
+     asp = 1,
+     axes = F,
+     xlab = "",
+     ylab = "",
+     pch = 21,
+     bg = cols,
+     cex = 2,
+     main = "<= Post.-Ant. =>")
+
+for (i in 1:dim(mshp)[1]) {
+  lines(x = -c(bilat_sym$DA.component[i, 3, 1], bilat_sym$DA.component[i, 3, 2]),
+        y = c(bilat_sym$DA.component[i, 2, 1], bilat_sym$DA.component[i, 2, 2]),
+        col = "black",
+        lwd = 3)
+}
+
+dev.off()
+
+# FOR FA
+
+pdf(file = paste(input_folder, 
+                 "lollipopFA.pdf", 
+                 sep = ""),
+    width = 8,
+    height = 5)
+
+layout(matrix(1:2, ncol = 2))
+
+par(mar = c(1, 1, 4, 1))
+
+plot(bilat_sym$FA.component[,c(2,1),2], 
+     asp = 1,
+     axes = F,
+     xlab = "",
+     ylab = "",
+     pch = 21,
+     bg = cols,
+     cex = 2,
+     main = "<= Right-Left =>")
+
+for (i in 1:dim(mshp)[1]) {
+  lines(x = c(bilat_sym$FA.component[i, 2, 1], bilat_sym$FA.component[i, 2, 2]),
+        y = c(bilat_sym$FA.component[i, 1, 1], bilat_sym$FA.component[i, 1, 2]),
+        col = "black",
+        lwd = 3)
+}
+
+plot(x = -bilat_sym$FA.component[,3,1], 
+     y = bilat_sym$FA.component[,2,1],
+     asp = 1,
+     axes = F,
+     xlab = "",
+     ylab = "",
+     pch = 21,
+     bg = cols,
+     cex = 2,
+     main = "<= Post.-Ant. =>")
+
+for (i in 1:dim(mshp)[1]) {
+  lines(x = -c(bilat_sym$FA.component[i, 3, 1], bilat_sym$FA.component[i, 3, 2]),
+        y = c(bilat_sym$FA.component[i, 2, 1], bilat_sym$FA.component[i, 2, 2]),
+        col = "black",
+        lwd = 3)
+}
+
+dev.off()
+
+#-------------------------------------------------------------------------------
+#Asymmetry PCA plot
+
+pdf(file = paste(input_folder, "PCA_asym_comp.pdf"),
+    width = 5,
+    height = 3)
+
+layout(1)
+
+par(mar = c(4,4,1,1))
+plot(decomp_asym$PCA.asym$x[,1:2], 
+     asp = 1,
+     pch = 19,
+     cex = 0.5,
+     xlim = c(-max(abs(decomp_asym$PCA.asym$x[, 1])), 
+              max(abs(decomp_asym$PCA.asym$x[, 1]))),
+     ylim = c(-max(abs(decomp_asym$PCA.asym$x[, 2])), 
+              max(abs(decomp_asym$PCA.asym$x[, 2]))),
+     xlab = "PC1: DA component",
+     ylab = "PC2: Major FA component")
+
+abline(h = 0,
+       v = 0,
+       col = "gray")
+
+#arrows(x0 = 0,
+#       y0 = 0,
+#       x1 = decomp_asym$PCA.asym$x[,1],
+#       y1 = decomp_asym$PCA.asym$x[,2],
+#       length = 0.15,
+#       angle = 20,
+#       code = 2,
+#       lwd = 2,
+#       col = alpha("black", alpha = 0.3))
+dev.off()
+
+#-------------------------------------------------------------------------------
+# Asym vs BF plot
+
+pdf(file = paste(input_folder, "asym_vs_BF.pdf"),
+    width = 8,
+    height = 8)
+
+layout(matrix(1:4, 
+              ncol = 2, 
+              byrow = T))
+
+par(mar = c(4,4,1,1))
+
+plot(DA, 
+     bf2,
+     xlab = "Position along DA component",
+     ylab = "Bite force (N)",
+     pch = 19,
+     cex = 1.5)
+
+lines(newvals, 
+      pred_quadra,
+      lwd = 2,
+      col = "grey",
+      lty = 2)
+
+text(-0.065, 1.3,
+     labels = "N.S.",
+     col = "grey")
+
+plot(DA_mandi, 
+     bf2,
+     xlab = "Position along DA (mandibles only) component",
+     ylab = "Bite force (N)",
+     pch = 19,
+     cex = 1.5)
+
+lines(newvals3, 
+      pred_quadra3,
+      lwd = 2,
+      col = "grey",
+      lty = 2)
+
+text(-0.11, 1.3,
+     labels = "N.S.",
+     col = "grey")
+
+plot(FA, 
+     bf2,
+     xlab = "Position along FA major component",
+     ylab = "Bite force (N)",
+     pch = 19,
+     cex = 1.5)
+
+lines(newvals5, 
+      pred_quadra5,
+      lwd = 2,
+      col = "grey",
+      lty = 2)
+
+text(-0.06, 1,
+     labels = "N.S.",
+     col = "grey")
+
+plot(TA, 
+     bf2,
+     xlab = "Total asymmetry (distance between shape and its mirror)",
+     ylab = "Bite force (N)",
+     pch = 19,
+     cex = 1.5)
+
+lines(newvals2, 
+      pred_quadra2,
+      lwd = 2,
+      col = "grey",
+      lty = 2)
+
+text(0.07, 1.3,
+     labels = "N.S.",
+     col = "grey")
+
+dev.off()
