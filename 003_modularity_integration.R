@@ -70,6 +70,8 @@ df_modul_models <- data.frame(name = names_LM,
                               head_mand_asym = head_mand_asym,
                               head_mand_asym_sens = head_mand_asym_sens)
 
+df_modul_models <- df_modul_models[-c(8:10),]
+
 #-------------------------------------------------------------------------------
 
 input_folder <- "Figures/"
@@ -162,7 +164,7 @@ dev.off()
 
 # Plot the different models
 
-palette(c("bisque", "firebrick", "navyblue", "burlywood"))
+palette(c("bisque", "firebrick", "navyblue", "forestgreen"))
 
 pdf(file = paste(input_folder, "Module_Models.pdf"),
     width = 6, 
@@ -179,7 +181,7 @@ plot(x = -template[,2],
      asp = 1, 
      pch = 21, 
      cex = 2,
-     bg = head_mand[-c(8:10)],
+     bg = df_modul_models[,3],
      main = "Head-Mandibles",
      axes = F)
 
@@ -188,7 +190,7 @@ plot(x = -template[,2],
      asp = 1, 
      pch = 21, 
      cex = 2,
-     bg = head_mand_asym[-c(8:10)],
+     bg = df_modul_models[,5],
      main = "Head-Mandibles-Asymmetric",
      axes = F)
 
@@ -197,7 +199,7 @@ plot(x = -template[,2],
      asp = 1, 
      pch = 21, 
      cex = 2,
-     bg = head_mand_sens[-c(8:10)],
+     bg = df_modul_models[,4],
      main = "Head-Mandibles-Sensory",
      axes = F)
 
@@ -206,7 +208,7 @@ plot(x = -template[,2],
      asp = 1, 
      pch = 21, 
      cex = 2,
-     bg = head_mand_asym_sens[-c(8:10)],
+     bg = df_modul_models[,6],
      main = "Head-Mandibles-Asym-Sensory",
      axes = F)
 
