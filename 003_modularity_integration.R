@@ -25,8 +25,8 @@ no_modularity <- rep(1,
                      length(names_LM))
 # No modularity: all landmarks are in only one module
 
-head_mand <- c(1, 1, 2, 1, 1, 1, 1, 1, 1, 1,
-               1, 1, 1, 1, 2, 1, 1, 1, 2, 2,
+head_mand <- c(1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+               1, 1, 1, 1, 1, 1, 1, 1, 2, 2,
                2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
                2, 2, 2, 2, 2, 2, 1, 1)
 # Two modules: 
@@ -34,8 +34,8 @@ head_mand <- c(1, 1, 2, 1, 1, 1, 1, 1, 1, 1,
 #The mandibles (together as one module) = 2
 
 
-head_mand_sens <- c(1, 1, 2, 1, 4, 4, 4, 1, 1, 1,
-                    4, 4, 4, 1, 2, 4, 1, 1, 2, 2,
+head_mand_sens <- c(1, 1, 1, 1, 4, 4, 4, 1, 1, 1,
+                    4, 4, 4, 1, 1, 4, 1, 1, 2, 2,
                     2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
                     2, 2, 2, 2, 2, 2, 4, 4)
 # Three modules: 
@@ -43,8 +43,8 @@ head_mand_sens <- c(1, 1, 2, 1, 4, 4, 4, 1, 1, 1,
 #The mandibles = 2, 
 #The sensory structures = 3
 
-head_mand_asym <- c(1, 1, 2, 1, 1, 1, 1, 1, 1, 1,
-                    1, 1, 1, 1, 3, 1, 1, 1, 2, 3,
+head_mand_asym <- c(1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+                    1, 1, 1, 1, 1, 1, 1, 1, 2, 3,
                     2, 2, 2, 3, 3, 3, 2, 3, 2, 2,
                     2, 2, 3, 3, 3, 3, 1, 1)
 # Three modules:
@@ -53,8 +53,8 @@ head_mand_asym <- c(1, 1, 2, 1, 1, 1, 1, 1, 1, 1,
 # The left madible = 3
 
 
-head_mand_asym_sens <- c(1, 1, 2, 1, 4, 4, 4, 1, 1, 1,
-                         4, 4, 4, 1, 3, 4, 1, 1, 2, 3,
+head_mand_asym_sens <- c(1, 1, 1, 1, 4, 4, 4, 1, 1, 1,
+                         4, 4, 4, 1, 1, 4, 1, 1, 2, 3,
                          2, 2, 2, 3, 3, 3, 2, 3, 2, 2,
                          2, 2, 3, 3, 3, 3, 4, 4)
 # Four modules:
@@ -164,7 +164,7 @@ dev.off()
 
 # Plot the different models
 
-palette(c("bisque", "firebrick", "navyblue", "forestgreen"))
+palette(c("bisque", "firebrick", "navyblue", "darkolivegreen2"))
 
 pdf(file = paste(input_folder, "Module_Models.pdf"),
     width = 6, 
@@ -227,7 +227,7 @@ M <- matrix(NA,
 
 for (i in 1:dim(A)[3]) {M[i,] <- c(t(A[,,i]))}
 
-DF <- df_modul_models[-c(8:10),]
+DF <- df_modul_models
 
 DF_3 <- data.frame(apply(X = DF, 
                          MARGIN = 2, 

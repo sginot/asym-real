@@ -667,6 +667,7 @@ dev.off()
 
 #-------------------------------------------------------------------------------
 # Make lollipop plot for FA and DA components
+palette(c("bisque", "firebrick", "navyblue", "forestgreen"))
 
 cols <- head_mand[-c(8:10)] 
 
@@ -675,16 +676,17 @@ input_folder <- "Figures/"
 # FOR DA
 
 pdf(file = paste(input_folder, 
-                 "lollipopDA.pdf", 
+                 "lollipopDA2.pdf", 
                  sep = ""),
-    width = 8,
-    height = 5)
+    width = 10,
+    height = 6)
 
 par(mar = c(1, 1, 4, 1))
 
 layout(matrix(1:2, ncol = 2))
 
-plot(bilat_sym$DA.component[,c(2,1),2], 
+plot(bilat_sym$DA.component[,2,2], 
+     bilat_sym$DA.component[,1,2],
      asp = 1,
      axes = F,
      xlab = "",
@@ -700,6 +702,12 @@ for (i in 1:dim(mshp)[1]) {
         col = "black",
         lwd = 3)
 }
+
+text(bilat_sym$DA.component[,2,2], 
+     bilat_sym$DA.component[,1,2], 
+     labels = 1:35, 
+     pos = 2,
+     cex = 0.7)
 
 plot(x = -bilat_sym$DA.component[,3,1], 
      y = bilat_sym$DA.component[,2,1],
@@ -719,15 +727,21 @@ for (i in 1:dim(mshp)[1]) {
         lwd = 3)
 }
 
+text(-bilat_sym$DA.component[,3,1], 
+     bilat_sym$DA.component[,2,1], 
+     labels = 1:35, 
+     pos = 2,
+     cex = 0.7)
+
 dev.off()
 
 # FOR FA
 
 pdf(file = paste(input_folder, 
-                 "lollipopFA.pdf", 
+                 "lollipopFA2.pdf", 
                  sep = ""),
-    width = 8,
-    height = 5)
+    width = 10,
+    height = 6)
 
 layout(matrix(1:2, ncol = 2))
 
@@ -750,6 +764,12 @@ for (i in 1:dim(mshp)[1]) {
         lwd = 3)
 }
 
+text(bilat_sym$FA.component[,2,2], 
+     bilat_sym$FA.component[,1,2], 
+     labels = 1:35, 
+     pos = 2,
+     cex = 0.7)
+
 plot(x = -bilat_sym$FA.component[,3,1], 
      y = bilat_sym$FA.component[,2,1],
      asp = 1,
@@ -767,6 +787,12 @@ for (i in 1:dim(mshp)[1]) {
         col = "black",
         lwd = 3)
 }
+
+text(-bilat_sym$FA.component[,3,1], 
+     bilat_sym$FA.component[,2,1], 
+     labels = 1:35, 
+     pos = 2,
+     cex = 0.7)
 
 dev.off()
 
