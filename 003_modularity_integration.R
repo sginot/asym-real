@@ -63,12 +63,43 @@ head_mand_asym_sens <- c(1, 1, 1, 1, 4, 4, 4, 1, 1, 1,
 # The left mandible = 3
 # Sensory structures = 4
 
+ventral_dorsal <- c(1, 1, 1, 1, 4, 4, 4, 1, 1, 1,
+                    4, 4, 4, 1, 1, 4, 1, 1, 1, 1,
+                    1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+                    1, 1, 1, 1, 1, 1, 4, 4)
+# Two modules:
+# The dorsal part of the head (eyes, ocelli, antennae...)
+# The mandibles, associated with ventral part of the head (tentorium...)
+
+half_half <- c(NA, NA, 1, 1, 1, 1, 1, 1, NA, 2,
+               2, 2, 2, 2, 2, NA, 1, 2, 1, 2, 
+               1, 1, 1, 2, 2, 2, 1, 2, 1, 1,
+               1, 1, 2, 2, 2, 2, 1, 2)
+
+# Two modules:
+# Left side of head and mandibles
+# Right side
+# Midline landmarks excludede
+
+mandi_only <- c(NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,
+                NA, NA, NA, NA, NA, NA, NA, NA, 2, 3,
+                2, 2, 2, 3, 3, 3, 2, 3, 2, 2,
+                2, 2, 3, 3, 3, 3, NA, NA)
+
+# Two modules:
+# Left mandible
+# Right mandible
+
+
 df_modul_models <- data.frame(name = names_LM,
                               no_modul = no_modularity,
                               head_mand = head_mand,
                               head_mand_sens = head_mand_sens,
                               head_mand_asym = head_mand_asym,
-                              head_mand_asym_sens = head_mand_asym_sens)
+                              head_mand_asym_sens = head_mand_asym_sens,
+                              ventral_dorsal = ventral_dorsal,
+                              half_half = half_half,
+                              mandi_only = mandi_only)
 
 df_modul_models <- df_modul_models[-c(8:10),]
 
@@ -170,7 +201,7 @@ pdf(file = paste(input_folder, "Module_Models.pdf"),
     width = 6, 
     height = 9)
 
-layout(matrix(c(1:4), 
+layout(matrix(c(1:6), 
               ncol = 2,
               byrow = T))
 
@@ -210,6 +241,33 @@ plot(x = -template[,2],
      cex = 2,
      bg = df_modul_models[,6],
      main = "Head-Mandibles-Asym-Sensory",
+     axes = F)
+
+plot(x = -template[,2],
+     y = template[,3],
+     asp = 1, 
+     pch = 21, 
+     cex = 2,
+     bg = df_modul_models[,7],
+     main = "Ventral-Dorsal",
+     axes = F)
+
+plot(x = -template[,2],
+     y = template[,3],
+     asp = 1, 
+     pch = 21, 
+     cex = 2,
+     bg = df_modul_models[,8],
+     main = "Half-Half",
+     axes = F)
+
+plot(x = -template[,2],
+     y = template[,3],
+     asp = 1, 
+     pch = 21, 
+     cex = 2,
+     bg = df_modul_models[,9],
+     main = "Mandibles-only",
      axes = F)
 
 dev.off()
@@ -315,25 +373,47 @@ return(mat)
 
 M <- congruence_coef(av_A)
 
-#Geomorph much simpler tests
+#Geomorph has much simpler tests
 
+# Head-nmandibles 2 modules partition
 modul_test_1 <- modularity.test(A = A, 
                                 partition.gp = DF[,3],
                                 iter = 999,
                                 CI = T)
 
+# Ventral head structures, sensory (dorsal) and mandibles partition 3 modules
 modul_test_2 <- modularity.test(A = A, 
                                 partition.gp = DF[,4],
                                 iter = 999,
                                 CI = T)
 
+# Head as a whole, mandibles separate partition (3 modules)
 modul_test_3 <- modularity.test(A = A, 
                                 partition.gp = DF[,5],
                                 iter = 999,
                                 CI = T)
 
+# Head ventral, head sensory and mandibles separate (4 modules)
 modul_test_4 <- modularity.test(A = A, 
                                 partition.gp = DF[,6],
+                                iter = 999,
+                                CI = T)
+
+# Mandibles AND head ventral together, vs head dorsal sensory (2 modules)
+modul_test_5 <- modularity.test(A = A, 
+                                partition.gp = DF[,7],
+                                iter = 999,
+                                CI = T)
+
+# Left and right sides of the head as 2 modules. Midline LMs removed.
+modul_test_6 <- modularity.test(A = A[-which(is.na(DF[,8])),,], 
+                                partition.gp = na.omit(DF[,8]),
+                                iter = 999,
+                                CI = T)
+
+# Left and right mandibles only (2 modules) all other LM removed
+modul_test_7 <- modularity.test(A = A[-which(is.na(DF[,9])),,], 
+                                partition.gp = na.omit(DF[,9]),
                                 iter = 999,
                                 CI = T)
 
@@ -341,6 +421,9 @@ modul_compar <- compare.CR(modul_test_1,
                            modul_test_2, 
                            modul_test_3, 
                            modul_test_4,
+                           modul_test_5,
+                           modul_test_6,
+                           modul_test_7,
                            CR.null = T)
 
 integ_test_1 <- integration.test(A = A, 
@@ -359,13 +442,18 @@ integ_test_4 <- integration.test(A = A,
                                 partition.gp = DF[,6],
                                 iter = 999)
 
-
-newpart <- DF[,5]
-newpart[which(newpart == 1)] <- NA
-
 integ_test_5 <- integration.test(A = A, 
-                                 partition.gp = newpart,
+                                 partition.gp = DF[,7],
                                  iter = 999)
+
+integ_test_6 <- integration.test(A[-which(is.na(DF[,8])),,], 
+                                 partition.gp = na.omit(DF[,8]),
+                                 iter = 999)
+
+integ_test_7 <- integration.test(A[-which(is.na(DF[,9])),,], 
+                                 partition.gp = na.omit(DF[,9]),
+                                 iter = 999)
+
 
 A1 <- A[which(DF[,5] == 2),,]
 A2 <- A[which(DF[,5] == 3),,]
@@ -376,4 +464,133 @@ tbpls <- two.b.pls(A1 = A1,
 integ_compar <- compare.pls(integ_test_1, 
                             integ_test_2, 
                             integ_test_3, 
-                            integ_test_4)
+                            integ_test_4,
+                            integ_test_5,
+                            integ_test_6,
+                            integ_test_7)
+
+# Problem with Procrustes for entire dataset, test modul/integ with module-
+# specific alignment
+
+# Make function to align module by modul and output an array of same dimensions
+
+modul.intra.gpa <- function(A, partition, plot.compar = T) {
+  
+  mods <- unique(partition)
+  
+  A_intra_gpa <- array(data = NA,
+                       dim = dim(A))
+  
+  for (i in 1:length(mods)) {
+    
+    A_mod <- A[which(partition == mods[i]),,]
+    
+    centroid_mod <- apply(A_mod, 2, mean)
+    
+    A_mod_gpa <- pgpa(A_mod)$rotated
+    
+    A_intra_gpa[which(partition == mods[i]),,] <- A_mod_gpa
+      
+    #for (j in 1:dim(A_mod_gpa)[3]) {
+      
+    #  A_intra_gpa[which(partition == mods[i]),,j] <- 
+    #    t(t(A_mod_gpa[,,j]) + centroid_mod)
+      
+    #}
+    
+  }
+  
+  if (plot.compar) {
+    
+    layout(matrix(1:2, 
+                  ncol =2))
+    
+    plot(x = A[,2,],
+         y = A[,3,],
+         pch = 19,
+         cex = 0.5,
+         col = partition, 
+         asp = 1)
+    
+    plot(x = A_intra_gpa[,2,],
+         y = A_intra_gpa[,3,],
+         pch = 19,
+         cex = 0.5,
+         col = partition, 
+         asp = 1)
+  }
+  
+  mod_test <- modularity.test(A_intra_gpa,
+                              partition.gp = partition,
+                              CI = T)
+  
+  int_test <- integration.test(A_intra_gpa,
+                               partition.gp = partition)
+  
+  return(list(A_intra_gpa, mod_test, int_test))
+
+}
+
+# Apply function to 5 "really possible" modular partitions.
+
+ls_results <- list()
+
+for (i in 1:5) {
+  
+  ls_results[[i]] <- modul.intra.gpa(A,
+                                     partition = DF[,i+2],
+                                     plot.compar = T)
+}
+
+names(ls_results) <- names(DF)[3:7]
+
+modul_compar_intra_gpa <- compare.CR(ls_results$head_mand[[2]],
+                                     ls_results$head_mand_sens[[2]],
+                                     ls_results$head_mand_asym[[2]],
+                                     ls_results$head_mand_asym_sens[[2]],
+                                     ls_results$ventral_dorsal[[2]], 
+                                     CR.null = T)
+
+# Compare results from modularity analyses with global gpa, vs local gpa
+
+intra_gpa_Z <- modul_compar_intra_gpa$sample.z
+
+global_gpa_Z <- modul_compar$sample.z[1:6]
+
+names(intra_gpa_Z) <- names(global_gpa_Z) <- names(DF)[2:7]
+
+matZ <- rbind(intra_gpa_Z, 
+              global_gpa_Z)
+
+# Barplot for comparison
+par(mar = c(11,3,2,3))
+
+barplot(height = matZ, 
+        beside = T,
+        col = 1:2,
+        space = c(0,2),
+        las = 2)
+
+# Barplot ordered by global gpa Z score
+
+matZo <- matZ[, order(intra_gpa_Z)]
+
+
+
+par(mar = c(11,3,2,3))
+
+barplot(height = matZo, 
+        beside = T,
+        col = 1:2,
+        space = c(0,2),
+        las = 2)
+
+# With points 
+plot(x = 1:5,
+     y = matZ[1,-1],
+     pch = 21,
+     cex = 0.5,
+     bg = 1,
+     ylim = c(-2, -8))
+
+
