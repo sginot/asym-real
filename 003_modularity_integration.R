@@ -417,6 +417,12 @@ modul_test_7 <- modularity.test(A = A[-which(is.na(DF[,9])),,],
                                 iter = 999,
                                 CI = T)
 
+ls_modul <- list(modul_test_1,
+                 modul_test_2,
+                 modul_test_3,
+                 modul_test_4,
+                 modul_test_5)
+
 modul_compar <- compare.CR(modul_test_1, 
                            modul_test_2, 
                            modul_test_3, 
@@ -575,8 +581,6 @@ barplot(height = matZ,
 
 matZo <- matZ[, order(intra_gpa_Z)]
 
-
-
 par(mar = c(11,3,2,3))
 
 barplot(height = matZo, 
@@ -585,12 +589,99 @@ barplot(height = matZo,
         space = c(0,2),
         las = 2)
 
-# With points 
-plot(x = 1:5,
-     y = matZ[1,-1],
-     pch = 21,
-     cex = 0.5,
-     bg = 1,
-     ylim = c(-2, -8))
+# CR score comparison with CI
 
+matCR_intra_gpa <- matrix(NA, ncol = 3, 
+                          nrow = length(ls_results))
+
+for (i in 1:length(ls_results)) {
+  
+  matCR_intra_gpa[i, 1] <- ls_results[[i]][[2]]$CR
+  matCR_intra_gpa[i, 2:3] <- ls_results[[i]][[2]]$CInterval
+  
+}
+
+rownames(matCR_intra_gpa) <- names(ls_results)
+
+#---
+
+matCR_global_gpa <- matrix(NA, ncol = 3, 
+                           nrow = 5)
+
+rownames(matCR_global_gpa) <- names(ls_results)
+
+matCR_global_gpa[1,] <- c(modul_test_1$CR, 
+                          modul_test_1$CInterval)
+
+matCR_global_gpa[2,] <- c(modul_test_2$CR, 
+                          modul_test_2$CInterval)
+
+matCR_global_gpa[3,] <- c(modul_test_3$CR, 
+                          modul_test_3$CInterval)
+
+matCR_global_gpa[4,] <- c(modul_test_4$CR, 
+                          modul_test_4$CInterval)
+
+matCR_global_gpa[5,] <- c(modul_test_5$CR, 
+                          modul_test_5$CInterval)
+
+#---
+
+plot(x = 1:5,
+     y = matCR_global_gpa[,1],
+     pch = 21,
+     bg = 1,
+     cex =2,
+     ylim = c(0.4, 1))
+
+points(x = 1:5 + 0.1,
+     y = matCR_intra_gpa[,1],
+     pch = 21,
+     bg = 2,
+     cex =2)
+
+for (i in 1:5) {
+  
+  lines(x = rep(i, 2),
+        y = matCR_global_gpa[i,2:3],
+        lwd = 2,
+        col = 1)
+  
+  lines(x = rep(i, 2) + 0.1,
+        y = matCR_intra_gpa[i,2:3],
+        lwd = 2,
+        col = 2)
+}
+
+# Something appears wrong with the CI produced when using local alignment
+# Maybe due to something in geomorph, but probably rather due to the 
+# bootstrapping across modules which are not in their original positions?
+
+plot(x = 1:5,
+     y = matCR_global_gpa[,1],
+     pch = 21,
+     bg = 1,
+     cex =2,
+     ylim = c(0.4, 1))
+
+points(x = 1:5 + 0.1,
+       y = matCR_intra_gpa[,1],
+       pch = 21,
+       bg = 2,
+       cex =2)
+
+for (i in 1:5) {
+  
+  lines(x = rep(i, 2),
+        y = c(min(ls_modul[[i]]$CR.boot),
+              max(ls_modul[[i]]$CR.boot)),
+        lwd = 2,
+        col = 1)
+  
+  lines(x = rep(i, 2) + 0.1,
+        y = c(min(ls_results[[i]][[2]]$CR.boot),
+              max(ls_results[[i]][[2]]$CR.boot)),
+        lwd = 2,
+        col = 2)
+}
 
