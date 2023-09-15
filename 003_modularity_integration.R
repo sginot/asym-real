@@ -103,6 +103,7 @@ df_modul_models <- data.frame(name = names_LM,
 
 df_modul_models <- df_modul_models[-c(8:10),]
 
+DF <- df_modul_models
 #-------------------------------------------------------------------------------
 
 input_folder <- "Figures/"
@@ -261,14 +262,14 @@ plot(x = -template[,2],
      main = "Half-Half",
      axes = F)
 
-plot(x = -template[,2],
-     y = template[,3],
-     asp = 1, 
-     pch = 21, 
-     cex = 2,
-     bg = df_modul_models[,9],
-     main = "Mandibles-only",
-     axes = F)
+#plot(x = -template[,2],
+#     y = template[,3],
+#     asp = 1, 
+#     pch = 21, 
+#     cex = 2,
+#     bg = df_modul_models[,9],
+#     main = "Mandibles-only",
+#     axes = F)
 
 dev.off()
 
@@ -284,8 +285,6 @@ M <- matrix(NA,
             ncol = dim(A)[2] * dim(A)[1])
 
 for (i in 1:dim(A)[3]) {M[i,] <- c(t(A[,,i]))}
-
-DF <- df_modul_models
 
 DF_3 <- data.frame(apply(X = DF, 
                          MARGIN = 2, 
@@ -316,64 +315,66 @@ EMMLi(corr = as.data.frame(cong_M),
       mod = DF,
       abs = T,
       saveAs = f2)
-#Does not work, correlation must be between LANDMARKS, 
-#not individual coordinates
 
 #To produce correlation matrix between LMs -> use congruence coefficient R
 #See Goswami & Polly 2010
+#Not necessary, already a function available in paleomorph
 
 #Rij = sum((li - ui) . (lj - uj)) / sqrt(sum(li^2) . sum(lj^2))
 
-congruence_coef <- function(A) {
+#congruence_coef <- function(A) {
   
-  N <- dim(A)[3]
-  P <- dim(A)[1]
-  K <- dim(A)[2]
-  
-  mshp <- mshape(A)
-  
-  mat <- matrix(NA,
-                ncol = P,
-                nrow = P)
-  
-  for (i in 1:P) {
-    for (j in 1:P) {
-      
-      ui <- mshp[i,]
-      uj <- mshp[j,]
-      
-      dprod <- rep(NA, N)
-      
-      for (n in 1:N) {
-       
-        li <- A[i,,n] 
-        lj <- A[j,,n]
-        
-        dprod[n] <- (li - ui) %*% (lj - uj)
-        
-      }
-      
-      num <- sum(dprod)
-      
-      Li2 <- A[i,,]^2
-      Lj2 <- A[j,,]^2
-      
-      denom <- sqrt(sum(Li2) * sum(Lj2))
-      
-      Rij <- num / denom
-      
-      mat[i, j] <- Rij
-      
-    }
-    
-  }
-return(mat)
-}
+#  N <- dim(A)[3]
+#  P <- dim(A)[1]
+#  K <- dim(A)[2]
+#  
+#  mshp <- mshape(A)
+#  
+#  mat <- matrix(NA,
+#                ncol = P,
+#                nrow = P)
+#  
+#  for (i in 1:P) {
+#    for (j in 1:P) {
+#      
+#      ui <- mshp[i,]
+#      uj <- mshp[j,]
+#      
+#      dprod <- rep(NA, N)
+#      
+#      for (n in 1:N) {
+#       
+#        li <- A[i,,n] 
+#        lj <- A[j,,n]
+#        
+#        dprod[n] <- (li - ui) %*% (lj - uj)
+#        
+#      }
+#      
+#      num <- sum(dprod)
+#      
+#      Li2 <- A[i,,]^2
+#      Lj2 <- A[j,,]^2
+#      
+#      denom <- sqrt(sum(Li2) * sum(Lj2))
+#      
+#      Rij <- num / denom
+#      
+#      mat[i, j] <- Rij
+#      
+#    }
+#    
+#  }
+#return(mat)
+#}
 
 
-M <- congruence_coef(av_A)
+#M <- congruence_coef(av_A)
 
-#Geomorph has much simpler tests
+#-------------------------------------------------------------------------------
+# Geomorph CR and Z score for modularity comparisons
+# EMMLi tends to artificially over-support modularity partitions with more 
+# modules. This is apparently not the case with the Adams 2016 approach.
 
 # Head-nmandibles 2 modules partition
 modul_test_1 <- modularity.test(A = A, 
@@ -475,8 +476,9 @@ integ_compar <- compare.pls(integ_test_1,
                             integ_test_6,
                             integ_test_7)
 
-# Problem with Procrustes for entire dataset, test modul/integ with module-
-# specific alignment
+# Problem with Procrustes for entire dataset (Cardini 2019), 
+# test modul/integ with module-specific alignment.
+# However, this removes the spatial and size relationship between "real" LMs.
 
 # Make function to align module by modul and output an array of same dimensions
 
@@ -685,3 +687,47 @@ for (i in 1:5) {
         col = 2)
 }
 
+#-------------------------------------------------------------------------------
+# Bootstrapping to get 95CI for Z_CR values
+
+bootZ <- function(A, partition.gp, it = 100) {
+  
+  Z <- list()
+  
+  i <- 1
+  
+  while (i < it + 1) {
+    
+    index <- sample(1:dim(A)[3], 
+                    replace = T)
+    
+    Ab <- A[,,index]
+    
+    test <- modularity.test(A = Ab, 
+                            partition.gp = partition.gp,
+                            iter = 99,
+                            CI = F)
+    
+    Z[[i]] <- test$Z
+    
+    i <- i + 1
+  }
+
+Z}
+
+ls_bootZ <- lapply(1:length(ls_modul), 
+                   function(i) bootZ(A = A, 
+                                     partition.gp = DF[, i+2],
+                                     it = 1000))
+
+plot(1:5, matZ[2,2:6], ylim = c(0,-8))
+for (i in 1:5){lines(rep(i,2), 
+                       quantile(unlist(ls_bootZ[[i]]), 
+                                c(0.025,0.975)))}
+
+ls_bootZ_intra <- lapply(1:length(ls_results), 
+                   function(i) bootZ(A = A, 
+                                     partition.gp = DF[, i+2],
+                                     it = 1000))
+
+save.image()
