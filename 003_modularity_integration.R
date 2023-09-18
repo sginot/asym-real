@@ -41,7 +41,7 @@ head_mand_sens <- c(1, 1, 1, 1, 4, 4, 4, 1, 1, 1,
 # Three modules: 
 #The head capsule = 1, 
 #The mandibles = 2, 
-#The sensory structures = 3
+#The sensory structures = 4
 
 head_mand_asym <- c(1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
                     1, 1, 1, 1, 1, 1, 1, 1, 2, 3,
@@ -731,3 +731,91 @@ ls_bootZ_intra <- lapply(1:length(ls_results),
                                      it = 1000))
 
 save.image()
+
+#-------------------------------------------------------------------------------
+# Integration measure between modules (different partitions but only global GPA)
+
+rPLS1_head_mand <- integ_test_1$r.pls
+rPLS2_head_mand_sens <- integ_test_2$r.pls.mat
+rPLS3_head_mand_asym <- integ_test_3$r.pls.mat
+rPLS4_head_mand_asym_sens <- integ_test_4$r.pls.mat
+rPLS5_ventral_dorsal <- integ_test_5$r.pls
+rPLS6_half_half <- integ_test_6$r.pls
+rPLS7_mandi_only <- integ_test_7$r.pls
+
+rPLS_all <- list(rPLS1_head_mand,
+                 rPLS2_head_mand_sens,
+                 rPLS3_head_mand_asym,
+                 rPLS4_head_mand_asym_sens,
+                 rPLS5_ventral_dorsal,
+                 rPLS6_half_half,
+                 rPLS7_mandi_only)
+
+
+pdf(file = paste(input_folder, 
+                 "pairwise_integration_PLS.pdf", 
+                 sep = ""),
+    height = 12,
+    width = 5)
+
+layout(matrix(c(1:6), 
+              ncol = 2,
+              byrow = T))
+
+par(mar = c(1, 2, 4, 1))
+
+for (i in 1:6) {
+  
+  plot(x = template[,2],
+       y = template[,3],
+       asp = 1, 
+       pch = 21, 
+       cex = 1.5,
+       bg = DF[, i+2],
+       main = colnames(DF)[i+2],
+       axes = F)
+  
+  m_cent <- apply(template, 
+                  2, 
+                  tapply, 
+                  INDEX = as.factor(DF[, i+2]), 
+                  mean)[,2:3]
+  
+  cor_mat <- as.matrix(rPLS_all[[i]])
+  
+  if (length(cor_mat) == 1) {
+    cor_mat <- matrix(c(0, cor_mat, cor_mat, 0), 
+                      ncol = 2, byrow = T)
+    
+    colnames(cor_mat) <- rownames(m_cent)
+    rownames(cor_mat) <- rownames(m_cent)
+  } 
+  
+  for (j in rownames(cor_mat)) {
+    for (k in colnames(cor_mat)) {
+      
+      m_line <- rbind(m_cent[j,],
+                      m_cent[k,])
+      
+      lines(m_line,
+            lwd = cor_mat[j,k] * 20,
+            col = alpha("gray", 0.3))
+      
+      text(apply(m_line, 2, mean)[1],
+           apply(m_line, 2, mean)[2],
+           labels = round(cor_mat[j,k], 2),
+           cex = 1.5)
+      
+    }
+    
+    points(m_cent,
+           cex = 4,
+           pch = 21,
+           bg = rownames(m_cent))
+    
+  }
+  
+}
+
+dev.off()
+
