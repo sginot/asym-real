@@ -195,12 +195,12 @@ dev.off()
 
 
 # Plot the different models
-
-palette(c("bisque", "firebrick", "navyblue", "darkolivegreen2"))
+palette(palette.colors(palette = "Okabe-Ito")[2:7])
+#palette(c("bisque", "firebrick", "navyblue", "darkolivegreen2"))
 
 pdf(file = paste(input_folder, "Module_Models.pdf"),
     width = 6, 
-    height = 9)
+    height = 12)
 
 layout(matrix(c(1:6), 
               ncol = 2,
@@ -212,8 +212,8 @@ plot(x = -template[,2],
      y = template[,3],
      asp = 1, 
      pch = 21, 
-     cex = 2,
-     bg = df_modul_models[,3],
+     cex = 3,
+     bg = DF[,3],
      main = "Head-Mandibles",
      axes = F)
 
@@ -221,16 +221,7 @@ plot(x = -template[,2],
      y = template[,3],
      asp = 1, 
      pch = 21, 
-     cex = 2,
-     bg = df_modul_models[,5],
-     main = "Head-Mandibles-Asymmetric",
-     axes = F)
-
-plot(x = -template[,2],
-     y = template[,3],
-     asp = 1, 
-     pch = 21, 
-     cex = 2,
+     cex = 3,
      bg = df_modul_models[,4],
      main = "Head-Mandibles-Sensory",
      axes = F)
@@ -239,7 +230,16 @@ plot(x = -template[,2],
      y = template[,3],
      asp = 1, 
      pch = 21, 
-     cex = 2,
+     cex = 3,
+     bg = df_modul_models[,5],
+     main = "Head-Mandibles-Asym",
+     axes = F)
+
+plot(x = -template[,2],
+     y = template[,3],
+     asp = 1, 
+     pch = 21, 
+     cex = 3,
      bg = df_modul_models[,6],
      main = "Head-Mandibles-Asym-Sensory",
      axes = F)
@@ -248,7 +248,7 @@ plot(x = -template[,2],
      y = template[,3],
      asp = 1, 
      pch = 21, 
-     cex = 2,
+     cex = 3,
      bg = df_modul_models[,7],
      main = "Ventral-Dorsal",
      axes = F)
@@ -257,7 +257,7 @@ plot(x = -template[,2],
      y = template[,3],
      asp = 1, 
      pch = 21, 
-     cex = 2,
+     cex = 3,
      bg = df_modul_models[,8],
      main = "Half-Half",
      axes = F)
