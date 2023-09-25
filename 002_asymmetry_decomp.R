@@ -1,10 +1,11 @@
 # Application of asymmetry decomposition script
 
 # Required packages:
+library(geomorph)
 library(abind)
 library(scales)
-source("../repo/001_functions.R")
-source("../repo/002_asym_components.R")
+source("../asym_simulation/001_functions.R")
+source("../asym_simulation/002_asym_components.R")
 source("Rfunctions1.txt")
 
 #-------------------------------------------------------------------------------
@@ -61,7 +62,7 @@ pred_quadra <- predict(quadratic_mod, newdata = data.frame(DA = newvals,
                                                            DA_sq = newvals^2))
 
 plot(DA, bf2)
-lines(newvals, pred_quadra[,1])
+lines(newvals, pred_quadra)
 
 # Check for mandibles only and check for effect of TA
 
@@ -261,6 +262,20 @@ bilat_sym <- bilat.symmetry(A = shapes,
                             replicate = replic,
                             object.sym = T,
                             land.pairs = land_pairs)
+
+bilat_sym_typeII <- bilat.symmetry(A = shapes, 
+                            ind = ID, 
+                            replicate = replic,
+                            object.sym = T,
+                            land.pairs = land_pairs,
+                            SS.type = "II")
+
+bilat_sym_NORRPP <- bilat.symmetry(A = shapes, 
+                            ind = ID, 
+                            replicate = replic,
+                            object.sym = T,
+                            land.pairs = land_pairs,
+                            RRPP = F)
 
 
 # (M)ANOVAs for significance of global / partial / individual coordinate asym
