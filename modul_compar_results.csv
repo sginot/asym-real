@@ -1,0 +1,21 @@
+,A. Effect sizes (ZCR). Negative values represent stronger modular signal.,,,,,,,
+,No Modules,Head-Mandibles,Head-Mandibles-Sensory,Head-Mandibles asymmetric,Head-Mandibles asymmetric-Sensory,Ventral-Dorsal,Half-Half,Mandibles only
+,0,-4.5,-3.34,-3.25,-4.13,-3.5,-2.21,-3.23
+,B. Pairwise differences in effect size.,,,,,,,
+No Modules,0,4.5,3.34,3.25,4.13,3.5,2.21,3.23
+Head-Mandibles,4.5,0,0.16,0.01,0.13,0.19,1.59,0.43
+Head-Mandibles-Sensory,3.34,0.16,0,0.12,0.26,0.31,1.24,0.24
+Head-Mandibles asymmetric,3.25,0.01,0.12,0,0.12,0.18,1.31,0.35
+Head-Mandibles asymmetric-Sensory,4.13,0.13,0.26,0.12,0,0.07,1.61,0.52
+Ventral-Dorsal,3.5,0.19,0.31,0.18,0.07,0,1.51,0.54
+Half-Half,2.21,1.59,1.24,1.31,1.61,1.51,0,1.03
+Mandibles only,3.23,0.43,0.24,0.35,0.52,0.54,1.03,0
+,C. Pairwise P-values associated with pairwise differences in effect size.,,,,,,,
+No Modules,1,0,0,0,0,0,0.03,0
+Head-Mandibles,0,1,0.88,0.99,0.9,0.85,0.11,0.67
+Head-Mandibles-Sensory,0,0.88,1,0.9,0.79,0.76,0.22,0.81
+Head-Mandibles asymmetric,0,0.99,0.9,1,0.91,0.86,0.19,0.72
+Head-Mandibles asymmetric-Sensory,0,0.9,0.79,0.91,1,0.94,0.11,0.6
+Ventral-Dorsal,0,0.85,0.76,0.86,0.94,1,0.13,0.59
+Half-Half,0.03,0.11,0.22,0.19,0.11,0.13,1,0.31
+Mandibles only,0,0.67,0.81,0.72,0.6,0.59,0.31,1

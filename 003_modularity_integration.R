@@ -8,8 +8,8 @@ library(EMMLi)
 library(abind)
 library(scales)
 library(paleomorph)
-source("../repo/001_functions.R")
-source("../repo/002_asym_components.R")
+source("../asym_simulation/001_functions.R")
+source("../asym_simulation/002_asym_components.R")
 source("Rfunctions1.txt")
 palette(palette.colors(palette = "Okabe-Ito"))
 
@@ -304,7 +304,7 @@ f2 <- "output_EMMLi_LM_correl.csv"
 
 EMMLi(corr = as.data.frame(cor_M),
       N_sample = nrow(M),
-      mod = DF_3,
+      mod = DF_3[,1:6],
       abs = T,
       saveAs = f)
 #Test here with correlation matrix between individual coordinates
@@ -312,7 +312,7 @@ EMMLi(corr = as.data.frame(cor_M),
 
 EMMLi(corr = as.data.frame(cong_M),
       N_sample = nrow(M),
-      mod = DF,
+      mod = DF[,1:6],
       abs = T,
       saveAs = f2)
 
