@@ -223,6 +223,8 @@ CVTA <- sd(TA, na.rm = T)/mean(TA, na.rm = T)
 
 CVDA <- sd(DA, na.rm = T)/mean(abs(DA), na.rm = T)
 
+CVFA <- sd(FA, na.rm = T)/mean(abs(FA), na.rm = T)
+
 CVBF <- sd(bf, na.rm = T)/mean(bf, na.rm = T)
 
 CVBF2 <- sd(bf2, na.rm = T)/mean(bf2, na.rm = T)

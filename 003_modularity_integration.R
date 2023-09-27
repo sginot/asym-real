@@ -578,16 +578,16 @@ matZ <- rbind(intra_gpa_Z,
 # Barplot for comparison
 
 pdf(file = paste(input_folder, "Barplot_ZCR.pdf"),
-    height = 11,
+    height = 8,
     width = 6)
 
 layout(1)
-par(mar = c(16,5,2,3))
+par(mar = c(16,5,2,1))
 
 barplot(height = matZ, 
         beside = T,
-        col = 1:2,
-        space = c(0,2),
+        col = c("black", "gray"),
+        space = c(0,1),
         las = 2, 
         ylab = "Z_CR",
         names.arg = c("No modularity",
@@ -772,12 +772,18 @@ rPLS_all <- list(rPLS1_head_mand,
                  rPLS6_half_half,
                  rPLS7_mandi_only)
 
-
+titles <- c("A. Head-Mandibles", 
+            "B. Head-Mandibles-Sensory",
+            "C. Head-Mandibles asymmetric",
+            "D. Head-Mandibles asymmetric-Sensory",
+            "E. Ventral-Dorsal",
+            "F. Half-Half")
+  
 pdf(file = paste(input_folder, 
                  "pairwise_integration_PLS.pdf", 
                  sep = ""),
     height = 12,
-    width = 5)
+    width = 7)
 
 layout(matrix(c(1:6), 
               ncol = 2,
@@ -791,9 +797,9 @@ for (i in 1:6) {
        y = template[,3],
        asp = 1, 
        pch = 21, 
-       cex = 1.5,
+       cex = 2.5,
        bg = DF[, i+2],
-       main = colnames(DF)[i+2],
+       main = titles[i],
        axes = F)
   
   m_cent <- apply(template, 

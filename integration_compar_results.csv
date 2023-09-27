@@ -1,0 +1,19 @@
+,A. Effect sizes (ZPLS) for each partition.,,,,,,
+,Head-Mandibles,Head-Mandibles-Sensory,Head-Mandibles asymmetric,Head-Mandibles asymmetric-Sensory,Ventral-Dorsal,Half-Half,Mandibles only
+,2.75624,4.18681,3.11687,4.01071,2.17762,5.15903,5.31365
+,B. Pairwise differences in ZPLS between partitions.,,,,,,
+Head-Mandibles,0,0.18549,0.63877,0.00469,0.37715,1.57656,2.10529
+Head-Mandibles-Sensory,0.18549,0,1.0292,0.23604,0.27588,1.63784,2.21155
+Head-Mandibles asymmetric,0.63877,1.0292,0,0.80223,0.85547,2.55307,3.04515
+Head-Mandibles asymmetric-Sensory,0.00469,0.23604,0.80223,0,0.41235,1.85817,2.41466
+Ventral-Dorsal,0.37715,0.27588,0.85547,0.41235,0,0.79362,1.25629
+Half-Half,1.57656,1.63784,2.55307,1.85817,0.79362,0,0.65754
+Mandibles only,2.10529,2.21155,3.04515,2.41466,1.25629,0.65754,0
+,C. Pairwise P-values associated with pairwise differences in effect size.,,,,,,
+Head-Mandibles,1,0.85284,0.52297,0.99626,0.70606,0.1149,0.03527
+Head-Mandibles-Sensory,0.85284,1,0.30339,0.8134,0.78264,0.10146,0.027
+Head-Mandibles asymmetric,0.52297,0.30339,1,0.42242,0.39229,0.01068,0.00233
+Head-Mandibles asymmetric-Sensory,0.99626,0.8134,0.42242,1,0.68009,0.06314,0.01575
+Ventral-Dorsal,0.70606,0.78264,0.39229,0.68009,1,0.42742,0.20901
+Half-Half,0.1149,0.10146,0.01068,0.06314,0.42742,1,0.51083
+Mandibles only,0.03527,0.027,0.00233,0.01575,0.20901,0.51083,1
