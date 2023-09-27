@@ -550,34 +550,55 @@ for (i in 1:5) {
                                      plot.compar = T)
 }
 
-names(ls_results) <- names(DF)[3:7]
+ls_results[[6]] <- modul.intra.gpa(A = A[-which(is.na(DF[,8])),,], 
+                                    partition = na.omit(DF[,8]),
+                                    plot.compar = T)
+
+names(ls_results) <- names(DF)[3:8]
 
 modul_compar_intra_gpa <- compare.CR(ls_results$head_mand[[2]],
                                      ls_results$head_mand_sens[[2]],
                                      ls_results$head_mand_asym[[2]],
                                      ls_results$head_mand_asym_sens[[2]],
                                      ls_results$ventral_dorsal[[2]], 
+                                     ls_results$half_half[[2]],
                                      CR.null = T)
 
 # Compare results from modularity analyses with global gpa, vs local gpa
 
 intra_gpa_Z <- modul_compar_intra_gpa$sample.z
 
-global_gpa_Z <- modul_compar$sample.z[1:6]
+global_gpa_Z <- modul_compar$sample.z[1:7]
 
-names(intra_gpa_Z) <- names(global_gpa_Z) <- names(DF)[2:7]
+names(intra_gpa_Z) <- names(global_gpa_Z) <- names(DF)[2:8]
 
 matZ <- rbind(intra_gpa_Z, 
               global_gpa_Z)
 
 # Barplot for comparison
-par(mar = c(11,3,2,3))
+
+pdf(file = paste(input_folder, "Barplot_ZCR.pdf"),
+    height = 11,
+    width = 6)
+
+layout(1)
+par(mar = c(16,5,2,3))
 
 barplot(height = matZ, 
         beside = T,
         col = 1:2,
         space = c(0,2),
-        las = 2)
+        las = 2, 
+        ylab = "Z_CR",
+        names.arg = c("No modularity",
+                      "Head-Mandibles",
+                      "Head-Mandibles-Sensory",
+                      "Head-Mandibles asymmetric",
+                      "Head-Mandibles asymmetric-Sensory",
+                      "Ventral-Dorsal",
+                      "Half-Half"))
+
+dev.off()
 
 # Barplot ordered by global gpa Z score
 
