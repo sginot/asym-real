@@ -1,0 +1,24 @@
+"","MaxL","K","n","AICc","dAICc","Model_L","Post_Pob"
+"No.modules.default",635.78,2,595,-1267.54,272.83,0,0
+"head_mand.same.Mod + same.between",661.79,3,595,-1317.54,222.83,0,0
+"head_mand_sens.same.Mod + same.between",693.65,3,595,-1381.25,159.12,0,0
+"head_mand.sep.Mod + same.between",727.39,4,595,-1446.7,93.67,0,0
+"head_mand_sens.sep.Mod + same.between",728.57,5,595,-1447.03,93.34,0,0
+"head_mand_sens.same.Mod + sep.between",697.59,5,595,-1385.09,155.28,0,0
+"head_mand_sens.sep.Mod + sep.between",732.51,7,595,-1450.83,89.54,0,0
+"head_mand_sens.same.Mod + same.between",693.65,3,595,-1381.25,159.12,0,0
+"head_mand_sens.sep.Mod + same.between",728.57,5,595,-1447.03,93.34,0,0
+"head_mand_sens.same.Mod + sep.between",697.59,5,595,-1385.09,155.28,0,0
+"head_mand_sens.sep.Mod + sep.between",732.51,7,595,-1450.83,89.54,0,0
+"head_mand_asym.same.Mod + same.between",647.81,3,595,-1289.57,250.8,0,0
+"head_mand_asym_sens.same.Mod + same.between",679.1,3,595,-1352.17,188.2,0,0
+"head_mand_asym.sep.Mod + same.between",757.43,5,595,-1504.76,35.61,0,0
+"head_mand_asym.same.Mod + sep.between",665.01,5,595,-1319.93,220.44,0,0
+"head_mand_asym_sens.sep.Mod + same.between",755.91,6,595,-1499.68,40.69,0,0
+"head_mand_asym.sep.Mod + sep.between",774.64,7,595,-1535.09,5.28,0.07,0.07
+"head_mand_asym_sens.same.Mod + sep.between",704.6,8,595,-1392.96,147.41,0,0
+"head_mand_asym_sens.sep.Mod + sep.between",781.41,11,595,-1540.37,0,1,0.93
+"head_mand_asym_sens.same.Mod + same.between",679.1,3,595,-1352.17,188.2,0,0
+"head_mand_asym_sens.sep.Mod + same.between",755.91,6,595,-1499.68,40.69,0,0
+"head_mand_asym_sens.same.Mod + sep.between",704.6,8,595,-1392.96,147.41,0,0
+"head_mand_asym_sens.sep.Mod + sep.between",781.41,11,595,-1540.37,0,1,0.93

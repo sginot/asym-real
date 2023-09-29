@@ -554,7 +554,11 @@ ls_results[[6]] <- modul.intra.gpa(A = A[-which(is.na(DF[,8])),,],
                                     partition = na.omit(DF[,8]),
                                     plot.compar = T)
 
-names(ls_results) <- names(DF)[3:8]
+ls_results[[7]] <- modul.intra.gpa(A = A[-which(is.na(DF[,9])),,], 
+                                   partition = na.omit(DF[,9]),
+                                   plot.compar = T)
+
+names(ls_results) <- names(DF)[3:9]
 
 modul_compar_intra_gpa <- compare.CR(ls_results$head_mand[[2]],
                                      ls_results$head_mand_sens[[2]],
@@ -562,6 +566,7 @@ modul_compar_intra_gpa <- compare.CR(ls_results$head_mand[[2]],
                                      ls_results$head_mand_asym_sens[[2]],
                                      ls_results$ventral_dorsal[[2]], 
                                      ls_results$half_half[[2]],
+                                     ls_results$mandi_only[[2]],
                                      CR.null = T)
 
 # Compare results from modularity analyses with global gpa, vs local gpa
@@ -772,24 +777,49 @@ rPLS_all <- list(rPLS1_head_mand,
                  rPLS6_half_half,
                  rPLS7_mandi_only)
 
+#-------------------------------------------------------------------------------
+# Integration after module by module superimposition
+
+rPLS1_head_mand_mbm <- ls_results[[1]][[3]]$r.pls
+rPLS2_head_mand_sens_mbm <- ls_results[[2]][[3]]$r.pls.mat
+rPLS3_head_mand_asym_mbm <- ls_results[[3]][[3]]$r.pls.mat
+rPLS4_head_mand_asym_sens_mbm <- ls_results[[4]][[3]]$r.pls.mat
+rPLS5_ventral_dorsal_mbm <- ls_results[[5]][[3]]$r.pls
+rPLS6_half_half_mbm <- ls_results[[6]][[3]]$r.pls
+rPLS7_mandi_only_mbm <- ls_results[[7]][[3]]$r.pls
+
+rPLS_all_mbm <- list(rPLS1_head_mand_mbm,
+                 rPLS2_head_mand_sens_mbm,
+                 rPLS3_head_mand_asym_mbm,
+                 rPLS4_head_mand_asym_sens_mbm,
+                 rPLS5_ventral_dorsal_mbm,
+                 rPLS6_half_half_mbm,
+                 rPLS7_mandi_only_mbm)
+
+
+#-------------------------------------------------------------------------------
+# Plot
+
+palette(palette.colors(palette = "Okabe-Ito")[2:7])
+
 titles <- c("A. Head-Mandibles", 
             "B. Head-Mandibles-Sensory",
             "C. Head-Mandibles asymmetric",
             "D. Head-Mandibles asymmetric-Sensory",
             "E. Ventral-Dorsal",
             "F. Half-Half")
-  
+
 pdf(file = paste(input_folder, 
                  "pairwise_integration_PLS.pdf", 
                  sep = ""),
-    height = 12,
+    height = 13,
     width = 7)
 
 layout(matrix(c(1:6), 
               ncol = 2,
               byrow = T))
 
-par(mar = c(1, 2, 4, 1))
+par(mar = c(1, 1, 3, 1))
 
 for (i in 1:6) {
   
@@ -809,13 +839,16 @@ for (i in 1:6) {
                   mean)[,2:3]
   
   cor_mat <- as.matrix(rPLS_all[[i]])
+  cor_mat_mbm <- as.matrix(rPLS_all_mbm[[i]])
   
   if (length(cor_mat) == 1) {
     cor_mat <- matrix(c(0, cor_mat, cor_mat, 0), 
                       ncol = 2, byrow = T)
+    cor_mat_mbm <- matrix(c(0, cor_mat_mbm, cor_mat_mbm, 0), 
+                      ncol = 2, byrow = T)
     
-    colnames(cor_mat) <- rownames(m_cent)
-    rownames(cor_mat) <- rownames(m_cent)
+    colnames(cor_mat_mbm) <- colnames(cor_mat) <- rownames(m_cent)
+    rownames(cor_mat_mbm) <- rownames(cor_mat) <- rownames(m_cent)
   } 
   
   for (j in rownames(cor_mat)) {
@@ -827,18 +860,36 @@ for (i in 1:6) {
       lines(m_line,
             lwd = cor_mat[j,k] * 20,
             col = alpha("gray", 0.3))
+    }
+  }
+  
+  points(m_cent,
+         cex = 4,
+         pch = 21,
+         bg = rownames(m_cent)) 
+  
+  for (j in rownames(cor_mat)) {
+    for (k in colnames(cor_mat)) {
       
+      m_line <- rbind(m_cent[j,],
+                      m_cent[k,])
+      
+      if (round(cor_mat[j,k], 2) == 0) txt_col <- alpha("white", alpha = 0)
+      else txt_col <- "black"
+        
       text(apply(m_line, 2, mean)[1],
            apply(m_line, 2, mean)[2],
            labels = round(cor_mat[j,k], 2),
-           cex = 1.5)
+           cex = 1.2,
+           pos = 3,
+           col = txt_col)
       
+      text(apply(m_line, 2, mean)[1],
+           apply(m_line, 2, mean)[2],
+           labels = round(cor_mat_mbm[j,k], 2),
+           cex = 0.9,
+           col = txt_col)
     }
-    
-    points(m_cent,
-           cex = 4,
-           pch = 21,
-           bg = rownames(m_cent))
     
   }
   
@@ -846,3 +897,95 @@ for (i in 1:6) {
 
 dev.off()
 
+#-------------------------------------------------------------------------------
+# Plot relationship between rPLS with global superimposition vs module by module
+
+P_values_pairwise <- c(integ_test_1$P.value,
+                       integ_test_2$pairwise.P.values,
+                       integ_test_3$pairwise.P.values,
+                       integ_test_4$pairwise.P.values,
+                       integ_test_5$P.value,
+                       integ_test_6$P.value,
+                       integ_test_7$P.value)
+
+P_values_pairwise_mbm <- c(ls_results[[1]][[3]]$P.value,
+                           ls_results[[2]][[3]]$pairwise.P.values,
+                           ls_results[[3]][[3]]$pairwise.P.values,
+                           ls_results[[4]][[3]]$pairwise.P.values,
+                           ls_results[[5]][[3]]$P.value,
+                           ls_results[[6]][[3]]$P.value,
+                           ls_results[[7]][[3]]$P.value)
+
+integ_compar_intra_gpa <- compare.pls(ls_results[[1]][[3]],
+                                      ls_results[[2]][[3]],
+                                      ls_results[[3]][[3]],
+                                      ls_results[[4]][[3]],
+                                      ls_results[[5]][[3]],
+                                      ls_results[[6]][[3]],
+                                      ls_results[[7]][[3]])
+
+X <- unlist(rPLS_all)
+Y <- unlist(rPLS_all_mbm)
+
+mod_p_val <- lm(Y ~ X)
+
+newx <- seq(min(X), 
+            max(X), 
+            length.out = 100)
+
+preds <- predict(mod_p_val,
+                 newdata = data.frame(X = newx),
+                 interval = "confidence")
+
+pdf(file = paste(input_folder, 
+                 "rPLS_superimpositions_correlation", 
+                 sep = ""),
+    height = 6,
+    width = 6)
+
+plot(X, Y,  pch = NA,
+     xlim = c(0.2,1),
+     ylim = c(0.2,1),
+     xlab = "Global superimposition pairwise rPLS",
+     ylab = "Module by moudle superimposition pairwise rPLS",)
+
+abline(0,1, 
+       lty = 2, 
+       lwd = 2, 
+       col = "gray")
+
+clip(x1 = min(X),
+     x2 = max(X),
+     y1 = 0,
+     y2 = 1)
+
+abline(mod_p_val,
+       lwd = 2)
+
+polygon(x = c(newx, rev(newx)), 
+        y = c(preds[,2], rev(preds[,3])),
+        border = NA,
+        col = alpha("black", 0.2))
+
+clip(x1 = 0,
+     x2 = 2,
+     y1 = 0,
+     y2 = 2)
+
+points(X, 
+       Y,
+       cex = 2,
+       pch = as.numeric(P_values_pairwise < 0.05 
+                        & P_values_pairwise_mbm < 0.05)+ 21,
+       bg = as.numeric(P_values_pairwise < 0.05 
+                       & P_values_pairwise_mbm < 0.05) + 1)
+
+legend("topleft", 
+       legend = c("Only significant with global superimposition",
+                  "Significant with both superimposition approaches"),
+       pch = c(21, 22),
+       pt.bg = c(1, 2),
+       bty = "n",
+       pt.cex = 2)
+
+dev.off()
