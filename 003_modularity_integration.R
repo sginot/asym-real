@@ -8,13 +8,13 @@ library(EMMLi)
 library(abind)
 library(scales)
 library(paleomorph)
-source("../asym_simulation/001_functions.R")
-source("../asym_simulation/002_asym_components.R")
+source("001_functions.R")
+source("002_asym_components.R")
 source("Rfunctions1.txt")
 palette(palette.colors(palette = "Okabe-Ito"))
 
 #-------------------------------------------------------------------------------
-# Load landöark template
+# Load landmark template
 LM_template <- read.csv("data/LM_template.csv")
 
 #Make modularity models dataframe
@@ -50,7 +50,7 @@ head_mand_asym <- c(1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
 # Three modules:
 # The head capsule = 1
 # The right mandible = 2
-# The left madible = 3
+# The left mandible = 3
 
 
 head_mand_asym_sens <- c(1, 1, 1, 1, 4, 4, 4, 1, 1, 1,
@@ -90,6 +90,7 @@ mandi_only <- c(NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,
 # Left mandible
 # Right mandible
 
+abbrev_LM <- LM_template$Name
 
 df_modul_models <- data.frame(name = names_LM,
                               no_modul = no_modularity,
@@ -99,7 +100,8 @@ df_modul_models <- data.frame(name = names_LM,
                               head_mand_asym_sens = head_mand_asym_sens,
                               ventral_dorsal = ventral_dorsal,
                               half_half = half_half,
-                              mandi_only = mandi_only)
+                              mandi_only = mandi_only,
+                              abbrev = abbrev_LM)
 
 df_modul_models <- df_modul_models[-c(8:10),]
 
@@ -274,7 +276,7 @@ plot(x = -template[,2],
 dev.off()
 
 #-------------------------------------------------------------------------------
-#Test run EMMLi
+# Run EMMLi analyses
 
 dim(shapes)
 
@@ -315,61 +317,6 @@ EMMLi(corr = as.data.frame(cong_M),
       mod = DF[,1:6],
       abs = T,
       saveAs = f2)
-
-#To produce correlation matrix between LMs -> use congruence coefficient R
-#See Goswami & Polly 2010
-#Not necessary, already a function available in paleomorph
-
-#Rij = sum((li - ui) . (lj - uj)) / sqrt(sum(li^2) . sum(lj^2))
-
-#congruence_coef <- function(A) {
-  
-#  N <- dim(A)[3]
-#  P <- dim(A)[1]
-#  K <- dim(A)[2]
-#  
-#  mshp <- mshape(A)
-#  
-#  mat <- matrix(NA,
-#                ncol = P,
-#                nrow = P)
-#  
-#  for (i in 1:P) {
-#    for (j in 1:P) {
-#      
-#      ui <- mshp[i,]
-#      uj <- mshp[j,]
-#      
-#      dprod <- rep(NA, N)
-#      
-#      for (n in 1:N) {
-#       
-#        li <- A[i,,n] 
-#        lj <- A[j,,n]
-#        
-#        dprod[n] <- (li - ui) %*% (lj - uj)
-#        
-#      }
-#      
-#      num <- sum(dprod)
-#      
-#      Li2 <- A[i,,]^2
-#      Lj2 <- A[j,,]^2
-#      
-#      denom <- sqrt(sum(Li2) * sum(Lj2))
-#      
-#      Rij <- num / denom
-#      
-#      mat[i, j] <- Rij
-#      
-#    }
-#    
-#  }
-#return(mat)
-#}
-
-
-#M <- congruence_coef(av_A)
 
 #-------------------------------------------------------------------------------
 # Geomorph CR and Z score for modularity comparisons
@@ -461,13 +408,6 @@ integ_test_7 <- integration.test(A[-which(is.na(DF[,9])),,],
                                  partition.gp = na.omit(DF[,9]),
                                  iter = 999)
 
-
-A1 <- A[which(DF[,5] == 2),,]
-A2 <- A[which(DF[,5] == 3),,]
-
-tbpls <- two.b.pls(A1 = A1,
-                   A2 = A2)
-
 integ_compar <- compare.pls(integ_test_1, 
                             integ_test_2, 
                             integ_test_3, 
@@ -476,7 +416,285 @@ integ_compar <- compare.pls(integ_test_1,
                             integ_test_6,
                             integ_test_7)
 
-# Problem with Procrustes for entire dataset (Cardini 2019), 
+# 2B-PLS analysis between mandibles, and between head / mandi and with BF.
+A1 <- A[which(DF[,5] == 2),,] # Right mandible
+A2 <- A[which(DF[,5] == 3),,] # Left mandible
+A3 <- A[which(DF[,5] == 1),,] # Head
+
+tbpls_mandis <- two.b.pls(A1, A2)
+tbpls_LM_head <- two.b.pls(A1, A3)
+tbpls_RM_head <- two.b.pls(A2, A3)
+
+M1 <- M2 <- matrix(NA, 
+                   nrow = dim(A1)[3],
+                   ncol = dim(A1)[1]*dim(A1)[2])
+
+M3 <- matrix(NA, 
+             nrow = dim(A3)[3],
+             ncol = dim(A3)[1]*dim(A3)[2])
+
+for (i in 1:dim(A1)[3]) {
+  M1[i,] <- c(t(A1[,,i]))
+  M2[i,] <- c(t(A2[,,i]))
+  M3[i,] <- c(t(A3[,,i]))}
+
+tbpls_BF_LM <- two.b.pls(bf[-which(is.na(bf))], M1[-which(is.na(bf)),])
+tbpls_BF_RM <- two.b.pls(bf[-which(is.na(bf))], M2[-which(is.na(bf)),])
+tbpls_BF_head <- two.b.pls(bf[-which(is.na(bf))], M3[-which(is.na(bf)),])
+
+tbpls_BF2_LM <- two.b.pls(bf2[-which(is.na(bf2))], M1[-which(is.na(bf2)),])
+tbpls_BF2_RM <- two.b.pls(bf2[-which(is.na(bf2))], M2[-which(is.na(bf2)),])
+tbpls_BF2_head <- two.b.pls(bf2[-which(is.na(bf2))], M3[-which(is.na(bf2)),])
+
+#-------------------------------------------------------------------------------
+# Graphical representation of covariance patterns between modules,
+# à la Burns et al. 2023
+
+# Make function
+
+covar.modules <- function(A, 
+                          partition, 
+                          part.names = sort(unique(partition)), 
+                          LM.names = 1:length(partition),
+                          color = hcl.colors(20, 
+                                             palette = "viridis",
+                                             alpha = NULL, 
+                                             rev = FALSE, 
+                                             fixup = TRUE)) {
+  
+  P_fac <- as.factor(partition) # Making sure this is a factor
+
+  # Define dimensions
+  n <- dim(A)[3]
+  p <- dim(A)[1]
+  k <- dim(A)[2]
+  
+  #Empty matrix for coordinates
+  cooM <- matrix(NA,
+                  nrow = n,
+                  ncol = p * k)
+  
+  # Fill matrix with coordinates (columns) for each individual (row)
+  for (i in 1:dim(A)[3]) {cooM[i,] <- c(t(A[,,i]))}
+  
+  # Compute covariance and correlation matrices for all coordinates
+  covM <- abs(cov(cooM))
+  corM <- abs(cor(cooM))
+  
+  # Compute congruence matrix for LANDMARKS (combined coordinates)
+  congruM <- abs(dotcorr(A))
+  
+  # Reorder matrices so that columns of the same module are together
+  o <- order(P_fac)
+  congruMo <- congruM[o, o]
+  LM.names <- LM.names[o]
+  
+  oo <- c(t(cbind(o * 3 - 2, 
+                  o * 3 - 1, 
+                  o * 3)))
+  
+  covMo <- covM[oo, oo]
+  corMo <- corM[oo, oo]
+
+  # Number of columns belonging to each module
+  l_part <- table(P_fac)
+  l_part_coo <- l_part * 3
+  
+  # Start plotting
+  par(mfrow = c(1, 2),
+      mar = c(4, 4, 5, 4))
+  
+  # Plot full covar matrix (i.e. for coordinates)
+  image(x = 1:dim(covMo)[1], 
+        y = 1:dim(covMo)[1], 
+        z = covMo, 
+        col = color,
+        main = "Coordinates covariance matrix",
+        xlab = "",
+        ylab = "",
+        xaxt = "n",
+        yaxt = "n")
+  
+  abline(v = cumsum(l_part_coo) + 0.5, 
+         h = cumsum(l_part_coo) + 0.5,
+         lwd = 3, 
+         col = "grey") # Add lines separating the different modules
+  
+  axis(side = 1,
+       at = seq(2, dim(covMo)[1], by = 3),
+       labels = LM.names, 
+       las = 2,
+       cex.axis = 0.7)
+  
+  axis(side = 2,
+       at = seq(2, dim(covMo)[1], by = 3),
+       labels = LM.names, 
+       las = 2,
+       cex.axis = 0.7)
+  
+  legend(x = p * k + 1, 
+         y = p * k + 0.5, 
+         bty = "o",
+         xpd = T,
+         legend = round(seq(min(covMo), 
+                            max(covMo), 
+                            length = length(color)),
+                        7), 
+         col = color, 
+         pch = 15, 
+         cex = 0.7)
+  
+  cms <- c(0, cumsum(l_part_coo))
+  vt <- cms[-length(cms)] + diff(cms) / 2
+  
+  text(x = vt, 
+       y = p * k + 5, 
+       labels = part.names,
+       xpd = T,
+       font = 2)
+  
+  text(y = vt, 
+       x = p * k - 3, 
+       labels = part.names, 
+       xpd = F, 
+       srt = 90, 
+       font = 2,
+       col ="white")
+
+  # Plot correl matrix for landmarks
+  image(x = 1:dim(congruMo)[1], 
+        y = 1:dim(congruMo)[1], 
+        z = congruMo, 
+        col = color,
+        main = "Landmarks correlation matrix",
+        xlab = "",
+        ylab = "",
+        xaxt = "n",
+        yaxt = "n")
+  
+  axis(side = 1,
+       at = seq(1, length(LM.names), by = 1),
+       labels = LM.names, 
+       las = 2, 
+       cex.axis = 0.7)
+  
+  axis(side = 2,
+       at = seq(1, length(LM.names), by = 1),
+       labels = LM.names, 
+       las = 2,
+       cex.axis = 0.7)
+  
+  abline(v = cumsum(l_part) + 0.5, 
+         h = cumsum(l_part) + 0.5,
+         lwd = 3, 
+         col = "grey") # Add lines separating modules
+  
+  legend(x = p + 1,
+         y = p + 0.5,
+         xpd = T,
+         legend = round(seq(min(congruMo), 
+                            max(congruMo), 
+                            length = length(color)),
+                        2), 
+         col = color, 
+         pch = 15, 
+         cex = 0.7)
+  
+  cms <- c(0, cumsum(l_part))
+  vt <- cms[-length(cms)] + diff(cms) / 2
+  
+  text(x = vt, 
+       y = p + 2, 
+       labels = part.names,
+       xpd = T,
+       font = 2)
+  
+text(y = vt, 
+     x = p - 0.5, 
+     labels = part.names, 
+     xpd = F, 
+     font = 2, 
+     srt = 90, 
+     col = "white")
+  
+}
+
+#-------------------------------------------------------------------------------
+# Produce figures with combined matrices plots
+
+pdf(file = "Figures/head_mandible.pdf", 
+    width = 11, 
+    height = 6)
+
+covar.modules(A = av_A, 
+              partition = DF[,3], 
+              part.names = c("head", "mandibles"),
+              LM.names = DF$abbrev)
+dev.off()
+
+pdf(file = "Figures/head_mand_sens.pdf", 
+    width = 11, 
+    height = 6)
+
+covar.modules(A = av_A, 
+              partition = DF[,4], 
+              part.names = c("head", "mandibles", "sensory"),
+              LM.names = DF$abbrev)
+dev.off()
+
+pdf(file = "Figures/head_mandi_asym.pdf", 
+    width = 11, 
+    height = 6)
+
+covar.modules(A = av_A, 
+              partition = DF[,5], 
+              part.names = c("head", "mandi_R", "mandi_L"),
+              LM.names = DF$abbrev)
+dev.off()
+
+pdf(file = "Figures/head_mandi_asym_sensory.pdf", 
+    width = 11, 
+    height = 6)
+
+covar.modules(A = av_A, 
+              partition = DF[,6], 
+              part.names = c("head", "mandi_R", "mandi_L", "sensory"),
+              LM.names = DF$abbrev)
+dev.off()
+
+pdf(file = "Figures/ventral_dorsal.pdf", 
+    width = 11, 
+    height = 6)
+
+covar.modules(A = av_A, 
+              partition = DF[,7], 
+              part.names = c("ventral", "dorsal"),
+              LM.names = DF$abbrev)
+dev.off()
+
+# Caption for the landmark names
+plot(x = rep(3.5, dim(DF)[1]),
+     y = 1:dim(DF)[1],
+     xlim = c(0, 4),
+     pch = "-",
+     bty = "n",
+     xaxt = "n",
+     yaxt = "n",
+     xlab = "",
+     ylab = "")
+text(x = rep(3.4, dim(DF)[1]),
+     y = 1:dim(DF)[1],
+     labels = DF$name,
+     cex = 0.8,
+     adj = 1)
+text(x = rep(3.6, dim(DF)[1]),
+     y = 1:dim(DF)[1],
+     labels = DF$abbrev,
+     cex = 0.8,
+     adj = 0)
+
+#-------------------------------------------------------------------------------
+# Possible problem with Procrustes for entire dataset (Cardini 2019), 
 # test modul/integ with module-specific alignment.
 # However, this removes the spatial and size relationship between "real" LMs.
 
@@ -571,7 +789,7 @@ modul_compar_intra_gpa <- compare.CR(ls_results$head_mand[[2]],
 
 # Compare results from modularity analyses with global gpa, vs local gpa
 
-intra_gpa_Z <- modul_compar_intra_gpa$sample.z
+intra_gpa_Z <- modul_compar_intra_gpa$sample.z[1:7]
 
 global_gpa_Z <- modul_compar$sample.z[1:7]
 
@@ -636,7 +854,7 @@ rownames(matCR_intra_gpa) <- names(ls_results)
 matCR_global_gpa <- matrix(NA, ncol = 3, 
                            nrow = 5)
 
-rownames(matCR_global_gpa) <- names(ls_results)
+rownames(matCR_global_gpa) <- names(ls_results)[1:5]
 
 matCR_global_gpa[1,] <- c(modul_test_1$CR, 
                           modul_test_1$CInterval)
@@ -663,7 +881,7 @@ plot(x = 1:5,
      ylim = c(0.4, 1))
 
 points(x = 1:5 + 0.1,
-     y = matCR_intra_gpa[,1],
+     y = matCR_intra_gpa[1:5,1],
      pch = 21,
      bg = 2,
      cex =2)
@@ -693,7 +911,7 @@ plot(x = 1:5,
      ylim = c(0.4, 1))
 
 points(x = 1:5 + 0.1,
-       y = matCR_intra_gpa[,1],
+       y = matCR_intra_gpa[1:5,1],
        pch = 21,
        bg = 2,
        cex =2)
@@ -747,6 +965,7 @@ ls_bootZ <- lapply(1:length(ls_modul),
                                      it = 1000))
 
 plot(1:5, matZ[2,2:6], ylim = c(0,-8))
+
 for (i in 1:5){lines(rep(i,2), 
                        quantile(unlist(ls_bootZ[[i]]), 
                                 c(0.025,0.975)))}

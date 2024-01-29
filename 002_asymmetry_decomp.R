@@ -4,17 +4,31 @@
 library(geomorph)
 library(abind)
 library(scales)
-source("../asym_simulation/001_functions.R")
-source("../asym_simulation/002_asym_components.R")
+source("001_functions.R")
+source("002_asym_components.R")
 source("Rfunctions1.txt")
+library(rgl)
+options(rgl.printRglwidget = TRUE)
+#options(browser = "opera") #Can be modified (some bugs with firefox)
 
 #-------------------------------------------------------------------------------
 # Global asymmetry decomposition
 
-reord_LM <- locate.reorder(shape = pA$mshape,
-                           along = 2)
+# 1st step: need to have landmarks after mirroring in the proper order.
 
-decomp_asym <- mv.asym(A = pA$rotated,
+#reord_LM <- c(1,2,12,11,9,8,10,6,5,7,4,3,13,15,14,17,16,21,22,23,18,19,20,
+#              25,24,30,31,32,33,26,27,28,29,35,34)
+# If bug with rgl, use this vector instead of running the next line
+
+#reord_LM <- locate.reorder(shape = pA$mshape,
+#                           along = 2)
+
+reord_LM <- locate.reorder(shape = pA$mshape[,2:3],
+                           along = 1)
+# Or if rgl does not work, use this 2D alternative.
+
+# Asymmetry decomposition à la Neubaeur et al.
+decomp_asym <- mv.asym(A = shapes,
                        reorder.LM = reord_LM,
                        Nrep = 1,
                        along = 2,
@@ -139,7 +153,7 @@ lines(newvals5, pred_quadra5)
 
 # Mandibular LMs are 16:33 (because landmarks 8:10 were removed previously)
 
-asym_mandi <- mv.asym(A = pA$rotated[16:33,,],
+asym_mandi <- mv.asym(A = shapes[16:33,,],
                        reorder.LM = reord_LM[16:33]-15,
                        Nrep = 1,
                        along = 2,
@@ -177,7 +191,7 @@ lines(newvals3, pred_quadra3)
 
 # Non-mandibular LMs are -c(16:33)
 
-asym_head <- mv.asym(A = pA$rotated[-c(16:33),,],
+asym_head <- mv.asym(A = shapes[-c(16:33),,],
                       reorder.LM = c(reord_LM[1:15], reord_LM[34:35]-18),
                       Nrep = 1,
                       along = 2,
@@ -232,7 +246,6 @@ CVBF2 <- sd(bf2, na.rm = T)/mean(bf2, na.rm = T)
 CVHL <- sd(head_l, na.rm = T)/mean(head_l, na.rm = T)
 
 CVsiz <- sd(csiz, na.rm = T)/mean(csiz, na.rm = T)
-
 
 #-------------------------------------------------------------------------------
 # Geomorph bilat.symmetry function
@@ -686,7 +699,8 @@ dev.off()
 # Make lollipop plot for FA and DA components
 palette(c("bisque", "firebrick", "navyblue", "forestgreen"))
 
-cols <- head_mand[-c(8:10)] 
+cols <- rep(1, 35)
+cols[16:33] <- 2
 
 input_folder <- "Figures/"
 
