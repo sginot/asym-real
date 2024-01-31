@@ -27,7 +27,7 @@ reord_LM <- locate.reorder(shape = pA$mshape[,2:3],
                            along = 1)
 # Or if rgl does not work, use this 2D alternative.
 
-# Asymmetry decomposition à la Neubaeur et al.
+# Asymmetry decomposition à la Neubauer et al.
 decomp_asym <- mv.asym(A = shapes,
                        reorder.LM = reord_LM,
                        Nrep = 1,

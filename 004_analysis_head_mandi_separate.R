@@ -47,6 +47,7 @@ for (i in 1:dim(A_LM)[3]) {
 pA_mand <- pgpa(A_mand) # Partial Procrustes sumperimposition
 
 shp_mand <- orp(pA_mand$rotated) # Orthogonal projection into Euclidean space
+mshp_mand <- pA_mand$mshape
 
 side <- as.factor(rep(c("R", "L"), 
                       length(ID)))
@@ -390,15 +391,19 @@ p_val <- paste("P =", integ_test_4mod$pairwise.P.values)
 
 parts <- levels(part_overall2)
 
+par(mar = c(4, 8, 6, 4))
+
 image(x = 1:dim(m)[1], 
       y = 1:dim(m)[1], 
       z = m, 
       col = color,
-      main = "Landmarks congruence matrix",
       xlab = "",
       ylab = "",
       xaxt = "n",
       yaxt = "n")
+
+title(main = "Landmarks congruence matrix",
+      line = 5)
 
 abline(v = c(8.5, 17.5, 26.5),
        h = c(8.5, 17.5, 26.5),
@@ -406,25 +411,34 @@ abline(v = c(8.5, 17.5, 26.5),
        col = "grey")
 
 axis(side = 1, 
-     at = 1:dim(congro_overall)[2], 
-     labels = lab_congro, 
-     las = 2)
+     at =  c(4.5, 13, 22, 31), 
+     labels = parts, 
+     font = 2,
+     las = 1)
 
 axis(side = 2, 
+     at =  c(4.5, 13, 22, 31), 
+     labels = parts, 
+     font = 2, las = 3)
+
+axis(side = 4, 
      at = 1:dim(congro_overall)[2], 
      labels = lab_congro, 
      las = 2)
 
-text(x = c(4.5, 13, 22, 31), 
-     y = 34.5,
-     labels = parts,
-     font = 2)
+axis(side = 3, 
+     at = 1:dim(congro_overall)[2], 
+     labels = lab_congro, 
+     las = 2)
 
-text(y = c(4.5, 13, 22, 31), 
-     x = 1.5,
-     labels = parts,
-     font = 2, 
-     srt = 90)
+legend(x = -4,
+       y = 35.5,
+       xpd = T,
+       legend = round(seq(min(na.omit(c(m))), 
+                          max(na.omit(c(m))), 
+                          length = length(color)), 2),
+       col = color,
+       pch = 15)
 
 text(x = c(rep(4.5, 3), rep(13, 2), 22), 
      y = c(13, 22, 31, 22, 31, 31),
@@ -436,13 +450,446 @@ text(x = c(rep(4.5, 3), rep(13, 2), 22),
      labels = p_val,
      pos = 1)
 
+# Possible artifact from alignment of left and right mandibles. May artificially
+# increase correlation between homologous landmarks
+
 #-------------------------------------------------------------------------------
 # 3D deformations
 
-import.tps <- function(x) {
+# Make function to import single tps files
+
+import.single.tps <- function(x) {
+  
   sc <- scan(x, what = "character")
   
+  raw_coo <- as.numeric(sc[-grep(pattern = "=",
+                                 x = sc)])
   
+  p <- as.numeric(sub(pattern = "LM=",
+                      replacement = "", 
+                      x = sc[grep(pattern = "LM=", sc)]))
+  
+  k <- length(raw_coo) / p
+  
+  m <- matrix(data = raw_coo,
+              nrow = p,
+              ncol = k,
+              byrow = T)
 }
-sc <- scan("data/LM_templates/LM_left_mandi_only.tps", what = "character")
-NLM <- sc
+
+# Import 3D templates (not the same coordinate system as aligned shapes)
+
+LM_templ <- import.single.tps("data/LM_templates/LM_left_mandi_only.tps")
+RM_templ <- import.single.tps("data/LM_templates/LM_right_mandi_only.tps")
+head_templ <- import.single.tps("data/LM_templates/LM_head_only.tps")
+
+plot3d(LM_templ, aspect = T)
+plot3d(RM_templ, aspect = T)
+plot3d(head_templ, aspect = T)
+
+mesh_head <- read.ply("head_mesh.ply")
+mesh_LM <- read.ply("left_mandible_mesh.ply")
+mesh_RM <- read.ply("right_mandible_mesh.ply")
+
+refMesh_head <- warpRefMesh(mesh = mesh_head, 
+                            mesh.coord = head_templ, 
+                            ref = mshp_head, 
+                            color = 2,
+                            centered = F)
+
+refMesh_RM <- warpRefMesh(mesh = mesh_RM, 
+                          mesh.coord = RM_templ, 
+                          ref = mshape(bilatsym_mand$symm.shape), 
+                          color = 2,
+                          centered = F)
+
+plot3d(refMesh_RM, 
+       asp = c(1 , 1, 1), 
+       xlim = c(-0.5,0.5),
+       ylim = c(-0.5,0.5),
+       zlim = c(-0.5,0.5))
+
+plot(bilatsym_head, mesh = refMesh_head)
+
+plot(bilatsym_mand, mesh = refMesh_RM)
+
+
+plotRefToTarget(
+  M1 = RM_templ,
+  M2 = mshp_LM,
+  mesh = refMesh_RM,
+  outline = NULL,
+  method ="surface",
+  mag = 1,
+  links = NULL,
+  label = FALSE,
+  axes = FALSE)
+
+plotreftarg <- plotRefToTarget(
+     M1 = bilatsym_head$DA.component[,,2],
+     M2 = bilatsym_head$DA.component[,,1],
+     mesh = refMesh_head,
+     outline = NULL,
+     method ="surface",
+     mag = 1,
+     links = NULL,
+     label = FALSE,
+     axes = FALSE, col = 2)
+
+plotreftargrev <- plotRefToTarget(
+  M1 = bilatsym_head$DA.component[,,1],
+  M2 = bilatsym_head$DA.component[,,2],
+  mesh = refMesh_head,
+  outline = NULL,
+  method ="surface",
+  mag = 1,
+  links = NULL,
+  label = FALSE,
+  axes = FALSE, col = 3)
+
+plot3d(plotreftarg)
+plot3d(plotreftargrev, col =3, add = T)
+
+#-------------------------------------------------------------------------------
+# Simpler solution: compare mean shapes of right and left mandi, then
+# add or substract the difference matrix N times, to show amplified differences
+
+diff_mand <- mshp_LM - mshp_RM
+
+x2_LM <- mshp_LM + 2 * diff_mand
+
+x2_RM <- mshp_RM - 2 * diff_mand
+
+mesh_mshp_LM <- warpRefMesh(mesh = mesh_LM, 
+                            mesh.coord = LM_templ, 
+                            ref = mshp_LM, 
+                            color = "red1",
+                            centered = F)
+
+mesh_x2_LM <- warpRefMesh(mesh = mesh_LM, 
+                            mesh.coord = LM_templ, 
+                            ref = x2_LM, 
+                            color = "firebrick",
+                            centered = F)
+
+mesh_mshp_RM <- warpRefMesh(mesh = mesh_RM, 
+                            mesh.coord = RM_templ, 
+                            ref = mshp_RM, 
+                            color = "cadetblue1",
+                            centered = F)
+
+mesh_x2_RM <- warpRefMesh(mesh = mesh_RM, 
+                          mesh.coord = RM_templ, 
+                          ref = x2_RM, 
+                          color = "cadetblue3",
+                          centered = F)
+
+
+antview <- matrix(c(-0.1, 1, 0, 0,
+                    0.4, 0.1, 0.9, 0,
+                    0.9, 0.2, -0.4, 0,
+                    0, 0, 0, 1), 
+                  ncol = 4,
+                  byrow = T)
+
+dorsview <- matrix(c(0.06,  0.89, -0.44,  0.00,
+                     -0.99, -0.01, -0.14,  0.00,
+                     -0.13,  0.45,  0.89,  0.00,
+                     0.00,  0.00,  0.00,  1.00), 
+                  ncol = 4,
+                  byrow = T)
+
+postview <- matrix(c(-0.28, -0.24, -0.93, 0.00,
+                     -0.95, -0.05, 0.30,  0.00,
+                     -0.12,  0.97, -0.21,  0.00,
+                     0.00,  0.00,  0.00,  1.00), 
+                   ncol = 4,
+                   byrow = F)
+
+# Anterior view of deformed mandibles
+
+par3d(windowRect = c(50, 50, 1000, 300),
+      userMatrix = antview)
+
+newSubscene3d(newviewport = c(0, 0, 300, 300))
+plot3d(mesh_x2_LM, 
+       box = F, 
+       axes = F, 
+       xlab = "",
+       ylab = "",
+       zlab = "")
+
+newSubscene3d(newviewport = c(200, 0, 300, 300))
+plot3d(mesh_mshp_LM, 
+       box = F, 
+       axes = F, 
+       xlab = "",
+       ylab = "",
+       zlab = "")
+
+newSubscene3d(newviewport = c(400, 0, 300, 300))
+plot3d(mesh_mshp_RM, 
+       box = F,
+       axes = F, 
+       xlab = "", 
+       ylab = "", 
+       zlab = "")
+
+newSubscene3d(newviewport = c(600, 0, 300, 300))
+plot3d(mesh_x2_RM, 
+       box = F, 
+       axes = F, 
+       xlab = "",
+       ylab = "", 
+       zlab = "")
+
+rgl.snapshot(filename = "mandi_asym_deform_anterior.png")
+
+close3d()
+
+# Dorsal view mandi deformation
+
+par3d(windowRect = c(50, 50, 1000, 300),
+      userMatrix = dorsview)
+
+newSubscene3d(newviewport = c(0, 0, 300, 300))
+plot3d(mesh_x2_LM, 
+       box = F, 
+       axes = F, 
+       xlab = "",
+       ylab = "",
+       zlab = "")
+
+newSubscene3d(newviewport = c(200, 0, 300, 300))
+plot3d(mesh_mshp_LM, 
+       box = F, 
+       axes = F, 
+       xlab = "",
+       ylab = "",
+       zlab = "")
+
+newSubscene3d(newviewport = c(400, 0, 300, 300))
+plot3d(mesh_mshp_RM, 
+       box = F,
+       axes = F, 
+       xlab = "", 
+       ylab = "", 
+       zlab = "")
+
+newSubscene3d(newviewport = c(600, 0, 300, 300))
+plot3d(mesh_x2_RM, 
+       box = F, 
+       axes = F, 
+       xlab = "",
+       ylab = "", 
+       zlab = "")
+
+rgl.snapshot(filename = "mandi_asym_deform_dorsal.png")
+
+close3d()
+
+# Posterior view mandi deformation
+
+par3d(windowRect = c(50, 50, 1000, 300),
+      userMatrix = round(postview,2))
+
+newSubscene3d(newviewport = c(0, 0, 300, 300))
+plot3d(mesh_x2_LM, 
+       box = F, 
+       axes = F, 
+       xlab = "",
+       ylab = "",
+       zlab = "")
+
+newSubscene3d(newviewport = c(200, 0, 300, 300))
+plot3d(mesh_mshp_LM, 
+       box = F, 
+       axes = F, 
+       xlab = "",
+       ylab = "",
+       zlab = "")
+
+newSubscene3d(newviewport = c(400, 0, 300, 300))
+plot3d(mesh_mshp_RM, 
+       box = F,
+       axes = F, 
+       xlab = "", 
+       ylab = "", 
+       zlab = "")
+
+newSubscene3d(newviewport = c(600, 0, 300, 300))
+plot3d(mesh_x2_RM, 
+       box = F, 
+       axes = F, 
+       xlab = "",
+       ylab = "", 
+       zlab = "")
+
+rgl.snapshot(filename = "mandi_asym_deform_post.png")
+
+close3d()
+
+#-------------------------------------------------------------------------------
+# Do the same for the head, mirror mean shape then add or substract the 
+# difference matrix N times, to show amplified differences
+
+reord_head <- locate.reorder(shape = mshp_head, along = 2)
+
+# reord_head <- c(1,2,12,11,9,8,10,6,5,7,4,3,13,15,14,17,16)
+
+mirror_mshp_head <- mshp_head[reord_head,]
+mirror_mshp_head[,2] <- mirror_mshp_head[,2] * -1
+
+diff_head <- mshp_head - mirror_mshp_head
+
+x2_head <- mshp_head - 2 * diff_head
+
+x2_mirror_head <- mshp_head + 2 * diff_head
+
+
+mesh_mshp_head <- warpRefMesh(mesh = mesh_head, 
+                            mesh.coord = head_templ, 
+                            ref = mshp_head, 
+                            color = "red1",
+                            centered = F)
+
+mesh_x2_head <- warpRefMesh(mesh = mesh_head, 
+                              mesh.coord = head_templ, 
+                              ref = x2_head, 
+                              color = "firebrick",
+                              centered = F)
+
+mesh_mirror_mshp_head <- warpRefMesh(mesh = mesh_head, 
+                                     mesh.coord = head_templ, 
+                                     ref = mirror_mshp_head, 
+                                     color = "cadetblue1",
+                                     centered = F)
+
+mesh_x2_mirror_head <- warpRefMesh(mesh = mesh_head, 
+                                   mesh.coord = head_templ, 
+                                   ref = x2_mirror_head, 
+                                   color = "cadetblue3",
+                                   centered = F)
+
+# Anterior views of deformed head
+
+par3d(windowRect = c(50, 50, 1500, 500),
+      userMatrix = antview)
+
+newSubscene3d(newviewport = c(0, 0, 500, 500))
+plot3d(mesh_x2_mirror_head, 
+       box = F, 
+       axes = F, 
+       xlab = "",
+       ylab = "",
+       zlab = "",xlim = c(-0.5, 0.5),ylim = c(-0.5, 0.5),zlim = c(-0.5, 0.5))
+
+newSubscene3d(newviewport = c(200, 0, 300, 300))
+plot3d(mesh_mirror_mshp_head, 
+       box = F, 
+       axes = F, 
+       xlab = "",
+       ylab = "",
+       zlab = "")
+
+newSubscene3d(newviewport = c(400, 0, 300, 300))
+plot3d(mesh_mshp_head, 
+       box = F,
+       axes = F, 
+       xlab = "", 
+       ylab = "", 
+       zlab = "")
+
+newSubscene3d(newviewport = c(600, 0, 300, 300))
+plot3d(mesh_x2_head, 
+       box = F, 
+       axes = F, 
+       xlab = "",
+       ylab = "", 
+       zlab = "")
+
+rgl.snapshot(filename = "head_asym_deform_anterior.png")
+
+close3d()
+
+# Dorsal views of head deformation
+
+par3d(windowRect = c(50, 50, 1000, 300),
+      userMatrix = dorsview)
+
+newSubscene3d(newviewport = c(0, 0, 300, 300))
+plot3d(mesh_x2_mirror_head, 
+       box = F, 
+       axes = F, 
+       xlab = "",
+       ylab = "",
+       zlab = "")
+
+newSubscene3d(newviewport = c(200, 0, 300, 300))
+plot3d(mesh_mirror_mshp_head, 
+       box = F, 
+       axes = F, 
+       xlab = "",
+       ylab = "",
+       zlab = "")
+
+newSubscene3d(newviewport = c(400, 0, 300, 300))
+plot3d(mesh_mshp_head, 
+       box = F,
+       axes = F, 
+       xlab = "", 
+       ylab = "", 
+       zlab = "")
+
+newSubscene3d(newviewport = c(600, 0, 300, 300))
+plot3d(mesh_x2_head, 
+       box = F, 
+       axes = F, 
+       xlab = "",
+       ylab = "", 
+       zlab = "")
+
+rgl.snapshot(filename = "head_asym_deform_dorsal.png")
+
+close3d()
+
+# Posterior views of head deformation
+
+par3d(windowRect = c(50, 50, 1000, 300),
+      userMatrix = round(postview,2))
+
+newSubscene3d(newviewport = c(0, 0, 300, 300))
+plot3d(mesh_x2_mirror_head, 
+       box = F, 
+       axes = F, 
+       xlab = "",
+       ylab = "",
+       zlab = "")
+
+newSubscene3d(newviewport = c(200, 0, 300, 300))
+plot3d(mesh_mirror_mshp_head, 
+       box = F, 
+       axes = F, 
+       xlab = "",
+       ylab = "",
+       zlab = "")
+
+newSubscene3d(newviewport = c(400, 0, 300, 300))
+plot3d(mesh_mshp_head, 
+       box = F,
+       axes = F, 
+       xlab = "", 
+       ylab = "", 
+       zlab = "")
+
+newSubscene3d(newviewport = c(600, 0, 300, 300))
+plot3d(mesh_x2_head, 
+       box = F, 
+       axes = F, 
+       xlab = "",
+       ylab = "", 
+       zlab = "")
+
+rgl.snapshot(filename = "head_asym_deform_post.png")
+
+close3d()
