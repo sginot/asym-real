@@ -259,28 +259,6 @@ bf_asym_mand_pls <- two.b.pls(A1 = bilatsym_mand$asymm.shape[,,-which(is.na(bf2)
                               A2 = bf2[-which(is.na(bf2))])
 
 #-------------------------------------------------------------------------------
-# Test for modularity within the head only
-# Then test for integration between each mandible and with head modules if 
-# significant head modularity is found
-#-------------------------------------------------------------------------------
-
-mod_test_head <- modularity.test(A = shp_head,
-                                 partition.gp = modu_head[,1],
-                                 iter = 999, 
-                                 CI = T)
-
-integ_test_head <- integration.test(A = shp_head,
-                                    partition.gp = modu_head[,1],
-                                    iter = 999)
-
-integ_test_3mod <- integration.test(A = A_overall,
-                                    partition.gp = part_overall,
-                                    iter = 999)
-
-integ_test_4mod <- integration.test(A = A_overall,
-                                    partition.gp = part_overall2,
-                                    iter = 999)
-#-------------------------------------------------------------------------------
 # Compute covariance / correlation patterns
 #-------------------------------------------------------------------------------
 
@@ -503,6 +481,33 @@ dev.off()
 # increase correlation between homologous landmarks
 
 
+#-------------------------------------------------------------------------------
+# Test for modularity within the head only and between superimposed mandibles
+# Then test for integration between each mandible and with head modules if 
+# significant head modularity is found
+#-------------------------------------------------------------------------------
+
+mod_test_head <- modularity.test(A = shp_head,
+                                 partition.gp = modu_head[,1],
+                                 iter = 999, 
+                                 CI = T)
+
+integ_test_head <- integration.test(A = shp_head,
+                                    partition.gp = modu_head[,1],
+                                    iter = 999)
+
+integ_test_3mod <- integration.test(A = A_overall,
+                                    partition.gp = part_overall,
+                                    iter = 999)
+
+integ_test_4mod <- integration.test(A = A_overall,
+                                    partition.gp = part_overall2,
+                                    iter = 999)
+
+mod_test_mand <- modularity.test(A = A_overall[18:35,,],
+                                 partition.gp = droplevels(part_overall[18:35]),
+                                 iter = 999, 
+                                 CI = T)
 #-------------------------------------------------------------------------------
 # Check if asymmetric components from head and mandi are correlated
 #-------------------------------------------------------------------------------
