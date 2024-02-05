@@ -49,8 +49,8 @@ head_mand_asym <- c(1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
                     2, 2, 3, 3, 3, 3, 1, 1)
 # Three modules:
 # The head capsule = 1
-# The right mandible = 2
-# The left mandible = 3
+# The left mandible = 2
+# The right mandible = 3
 
 
 head_mand_asym_sens <- c(1, 1, 1, 1, 4, 4, 4, 1, 1, 1,
@@ -59,8 +59,8 @@ head_mand_asym_sens <- c(1, 1, 1, 1, 4, 4, 4, 1, 1, 1,
                          2, 2, 3, 3, 3, 3, 4, 4)
 # Four modules:
 # The head capsule = 1
-# The right mandible = 2
-# The left mandible = 3
+# The left mandible = 2
+# The right mandible = 3
 # Sensory structures = 4
 
 ventral_dorsal <- c(1, 1, 1, 1, 4, 4, 4, 1, 1, 1,
@@ -106,6 +106,8 @@ df_modul_models <- data.frame(name = names_LM,
 df_modul_models <- df_modul_models[-c(8:10),]
 
 DF <- df_modul_models
+
+rownames(DF) <- 1:dim(DF)[1]
 #-------------------------------------------------------------------------------
 
 input_folder <- "Figures/"
@@ -115,11 +117,11 @@ input_folder <- "Figures/"
 
 template <- shapes[,,1]
   
-oculeyeR <- c(6, 7, 34)
-oculeyeL <- c(8, 10, 35)
+oculeyeL <- c(6, 7, 34)
+oculeyeR <- c(8, 10, 35)
 
-mandiR <- c(16, 18:20, 28, 29, 24, 26, 27)
-mandiL <- c(17, 21:23, 32, 33, 25, 31, 30)
+mandiL <- c(16, 18:20, 28, 29, 24, 26, 27)
+mandiR <- c(17, 21:23, 32, 33, 25, 31, 30)
 
 pdf(file = paste(input_folder, "LM_config.pdf"),
     width = 12, 
@@ -417,8 +419,8 @@ integ_compar <- compare.pls(integ_test_1,
                             integ_test_7)
 
 # 2B-PLS analysis between mandibles, and between head / mandi and with BF.
-A1 <- A[which(DF[,5] == 2),,] # Right mandible
-A2 <- A[which(DF[,5] == 3),,] # Left mandible
+A1 <- A[which(DF[,5] == 2),,] # Left mandible
+A2 <- A[which(DF[,5] == 3),,] # Right mandible
 A3 <- A[which(DF[,5] == 1),,] # Head
 
 tbpls_mandis <- two.b.pls(A1, A2)
@@ -436,15 +438,22 @@ M3 <- matrix(NA,
 for (i in 1:dim(A1)[3]) {
   M1[i,] <- c(t(A1[,,i]))
   M2[i,] <- c(t(A2[,,i]))
-  M3[i,] <- c(t(A3[,,i]))}
+  M3[i,] <- c(t(A3[,,i]))
+  }
 
-tbpls_BF_LM <- two.b.pls(bf[-which(is.na(bf))], M1[-which(is.na(bf)),])
-tbpls_BF_RM <- two.b.pls(bf[-which(is.na(bf))], M2[-which(is.na(bf)),])
-tbpls_BF_head <- two.b.pls(bf[-which(is.na(bf))], M3[-which(is.na(bf)),])
+tbpls_BF_LM <- two.b.pls(bf[-which(is.na(bf))], 
+                         M1[-which(is.na(bf)),])
+tbpls_BF_RM <- two.b.pls(bf[-which(is.na(bf))], 
+                         M2[-which(is.na(bf)),])
+tbpls_BF_head <- two.b.pls(bf[-which(is.na(bf))], 
+                           M3[-which(is.na(bf)),])
 
-tbpls_BF2_LM <- two.b.pls(bf2[-which(is.na(bf2))], M1[-which(is.na(bf2)),])
-tbpls_BF2_RM <- two.b.pls(bf2[-which(is.na(bf2))], M2[-which(is.na(bf2)),])
-tbpls_BF2_head <- two.b.pls(bf2[-which(is.na(bf2))], M3[-which(is.na(bf2)),])
+tbpls_BF2_LM <- two.b.pls(bf2[-which(is.na(bf2))], 
+                          M1[-which(is.na(bf2)),])
+tbpls_BF2_RM <- two.b.pls(bf2[-which(is.na(bf2))], 
+                          M2[-which(is.na(bf2)),])
+tbpls_BF2_head <- two.b.pls(bf2[-which(is.na(bf2))], 
+                            M3[-which(is.na(bf2)),])
 
 #-------------------------------------------------------------------------------
 # Graphical representation of covariance patterns between modules,
@@ -648,7 +657,7 @@ pdf(file = "Figures/head_mandi_asym.pdf",
 
 covar.modules(A = av_A, 
               partition = DF[,5], 
-              part.names = c("head", "mandi_R", "mandi_L"),
+              part.names = c("head", "mandi_L", "mandi_R"),
               LM.names = DF$abbrev)
 dev.off()
 
@@ -658,7 +667,7 @@ pdf(file = "Figures/head_mandi_asym_sensory.pdf",
 
 covar.modules(A = av_A, 
               partition = DF[,6], 
-              part.names = c("head", "mandi_R", "mandi_L", "sensory"),
+              part.names = c("head", "mandi_L", "mandi_R", "sensory"),
               LM.names = DF$abbrev)
 dev.off()
 
