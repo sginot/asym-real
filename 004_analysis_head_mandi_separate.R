@@ -98,6 +98,10 @@ part_overall2 <- as.factor(c(modu_head[,1],
 
 levels(part_overall2)[1:2] <- c("head", "sensory")
 
+modu_overall <- rep(part_overall2, each = 3)
+
+modo_overall <- modu_overall[order(modu_overall)]
+
 #-------------------------------------------------------------------------------
 # For analyses not requiring replicates, shapes are averaged across replicates
 # for each individual
@@ -295,6 +299,32 @@ congro_overall[1:17, 1:17] <- congro_overall[order(modu_head[,1]),
 m <- congro_overall
 m[upper.tri(congro_overall, diag = T)] <- NA # Make half empty matrix
 
+mcov <- cov_overall[order(modu_overall), order(modu_overall)]
+mcov[upper.tri(mcov, diag = T)] <- NA 
+
+mcor <- cor_overall[order(modu_overall), order(modu_overall)]
+mcor[upper.tri(mcor, diag = T)] <- NA 
+
+av_cov <- av_cor <- matrix(NA, 
+                           ncol = length(levels(modo_overall)),
+                           nrow = length(levels(modo_overall)))
+
+colnames(av_cov) <- colnames(av_cor) <- rownames(av_cov) <- rownames(av_cor) <- levels(modo_overall)
+
+for (i in 1:dim(av_cor)[1]) {
+  for (j in 1:dim(av_cor)[1]) {
+  
+  levi <- levels(modo_overall)[i]
+  levj <- levels(modo_overall)[j]
+  
+  wi <- which(modo_overall == levi)
+  wj <- which(modo_overall == levj)
+  
+  av_cov[i,j] <- mean(mcov[wi, wj], na.rm = T)
+  av_cor[i,j] <- mean(mcor[wi, wj], na.rm = T)
+  }
+}
+
 #-------------------------------------------------------------------------------
 # Covariance / correlation matrix heatmap plots
 #-------------------------------------------------------------------------------
@@ -332,6 +362,53 @@ abline(h = c(51.5, 78.5),
 
 dev.off()
 
+
+pdf(file = paste(output_folder, 
+                 "covariance_lowertri_heatmap.pdf",
+                 sep = "/"),
+    height = 8,
+    width = 8)
+
+image(x = 1:dim(mcov)[1], 
+      y = 1:dim(mcov)[1], 
+      z = mcov, 
+      col = color,
+      main = "Landmarks covariance matrix",
+      xlab = "",
+      ylab = "",
+      xaxt = "n",
+      yaxt = "n")
+
+abline(h = c(24.5, 51.5, 78.5),
+       v = c(24.5, 51.5, 78.5),
+       col = "grey",
+       lwd = 3)
+
+text(x = c(rep(12.5, 4), 
+           rep(37.5, 3), 
+           rep(63.5, 2), 91.5),
+     y = c(12.5, 37.5, 63.5, 91.5, 
+           37.5, 63.5, 91.5, 
+           63.5, 91.5, 
+           91.5),
+     labels = paste(na.omit(c(round(av_cov * 10^6, 2))), 
+                    "*10^-6"),
+     pos = 3,
+     srt = 45)
+
+axis(side = 1, 
+     at =  c(12.5, 37.5, 63.5, 91.5), 
+     labels = parts, 
+     font = 2,
+     las = 1)
+
+axis(side = 2, 
+     at =  c(12.5, 37.5, 63.5, 91.5), 
+     labels = parts, 
+     font = 2, las = 3)
+
+dev.off()
+
 # Correlation matrix, with individual coordinates as variables
 
 pdf(file = paste(output_folder, 
@@ -343,6 +420,30 @@ pdf(file = paste(output_folder,
 image(x = 1:dim(cor_overall)[1], 
       y = 1:dim(cor_overall)[1], 
       z = cor_overall, 
+      col = color,
+      main = "Landmarks correlation matrix",
+      xlab = "",
+      ylab = "",
+      xaxt = "n",
+      yaxt = "n")
+
+abline(h = c(51.5, 78.5),
+       v = c(51.5, 78.5),
+       col = "grey",
+       lwd = 3)
+
+dev.off()
+
+
+pdf(file = paste(output_folder, 
+                 "correlation_nodiag_heatmap.pdf",
+                 sep = "/"),
+    height = 8,
+    width = 8)
+
+image(x = 1:dim(corm)[1], 
+      y = 1:dim(corm)[1], 
+      z = corm, 
       col = color,
       main = "Landmarks correlation matrix",
       xlab = "",

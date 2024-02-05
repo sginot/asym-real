@@ -76,6 +76,17 @@ dat <- dat[-which(dat$ID == "497"),]
 name <- name[-grep("0497",
                    x = name)]
 
+plot3d(arr[,,1], 
+       xlim = c(-5,5), 
+       ylim = c(-5,5), 
+       zlim = c(-5,5), 
+       type = "s",
+       size = 0.5)  # Problem, all 3D reconstructions were mirrored, 
+                    # left morphology is right morphology
+                    # Need to correct this
+
+arr[,2,] <- arr[,2,] * -1 #mirror the y coordinates (medio-lateral axis)
+
 #-------------------------------------------------------------------------------
 
 # Partial generalized Procrustes analysis
@@ -223,6 +234,7 @@ cor.test(PC2.av, bf)
 # Deformation can be amplified by factor "ampli"
 # Plots the first 3 PC deformations if plots = T (open in new device)
 # If using 3D data, plots.dims allows to see deformation across orientations
+
 PC.deform <- function(A = A,
                       pca = pca,
                       ampli = 1,
