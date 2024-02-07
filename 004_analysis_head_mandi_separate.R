@@ -854,6 +854,163 @@ dev.off()
 # Possible artifact from alignment of left and right mandibles. May artificially
 # increase correlation between homologous landmarks
 
+#-------------------------------------------------------------------------------
+# Global figure with landmark template and matrices heatmaps
+#-------------------------------------------------------------------------------
+
+pdf(file = paste(output_folder, 
+                 "Landmark_modules_template.pdf",
+                 sep = "/"),
+    width = 16,
+    height = 16)
+
+layout(matrix(1:4, ncol = 2,
+              byrow = T),
+       widths = c(0.4, 0.6))
+
+par(mar = c(1,1,1,1))
+
+plot(x = arr[,2,1],
+     y = arr[,3,1],
+     asp = 1, 
+     pch = 21, 
+     cex = 3,
+     bg = DF[,6],
+     main = "A. Landmarks and modules",
+     axes = F,
+     xlab = "",
+     ylab = "")
+
+text(x = arr[,2,1],
+     y = arr[,3,1],
+     labels = DF[,10],
+     col = DF[,6],
+     offset = 1,
+     cex = 1.3,
+     font = 2,
+     pos = c(rep(1,3), 4, rep(1,6), 2, 
+             rep(1,7), 2, 3, 1, 4, 3, 2, 
+             4, 3, 4, 3, 1, 3, 2, 3, 1))
+
+plot(1,1, 
+     type = "n", 
+     bty = "n", 
+     xaxt = "n", 
+     yaxt = "n",
+     xlab = "",
+     ylab = "")
+
+legend("topleft", 
+       legend = paste(DF$abbrev[order(DF[,6])], 
+                      DF$name[order(DF[,6])],
+                      sep = " - "),
+       text.col = DF[order(DF[,6]), 6],
+       bty = "n",
+       cex = 1.3)
+
+par(mar = c(2.5, 3, 6, 1))
+
+image(x = 1:dim(mcov)[1], 
+      y = 1:dim(mcov)[1], 
+      z = mcov, 
+      col = color,
+      main = "B. Landmarks covariance matrix",
+      xlab = "",
+      ylab = "",
+      xaxt = "n",
+      yaxt = "n")
+
+abline(h = c(24.5, 51.5, 78.5),
+       v = c(24.5, 51.5, 78.5),
+       col = "grey",
+       lwd = 3)
+
+text(x = c(rep(12.5, 4), 
+           rep(37.5, 3), 
+           rep(63.5, 2), 91.5),
+     y = c(12.5, 37.5, 63.5, 91.5, 
+           37.5, 63.5, 91.5, 
+           63.5, 91.5, 
+           91.5),
+     labels = paste(na.omit(c(round(av_cov * 10^6, 2))), 
+                    "*10^-6"),
+     pos = 3,
+     srt = 45)
+
+axis(side = 1, 
+     at =  c(12.5, 37.5, 63.5, 91.5), 
+     labels = parts, 
+     font = 2,
+     las = 1, 
+     col = 1:4)
+
+axis(side = 2, 
+     at =  c(12.5, 37.5, 63.5, 91.5), 
+     labels = parts, 
+     font = 2, 
+     las = 3, 
+     col = 1:4)
+
+par(mar = c(2.5, 2, 6, 10))
+
+image(x = 1:dim(m)[1], 
+      y = 1:dim(m)[1], 
+      z = m, 
+      col = color,
+      xlab = "",
+      ylab = "",
+      xaxt = "n",
+      yaxt = "n")
+
+title(main = "C. Landmarks congruence matrix",
+      line = 5)
+
+abline(v = c(8.5, 17.5, 26.5),
+       h = c(8.5, 17.5, 26.5),
+       lwd = 3,
+       col = "grey")
+
+axis(side = 1, 
+     at =  c(4.5, 13, 22, 31), 
+     labels = parts, 
+     font = 2,
+     las = 1)
+
+axis(side = 2, 
+     at =  c(4.5, 13, 22, 31), 
+     labels = parts, 
+     font = 2, las = 3)
+
+axis(side = 4, 
+     at = 1:dim(congro_overall)[2], 
+     labels = lab_congro, 
+     las = 2)
+
+axis(side = 3, 
+     at = 1:dim(congro_overall)[2], 
+     labels = lab_congro, 
+     las = 2)
+
+legend(x = 40,
+       y = 35.5,
+       xpd = T,
+       legend = round(seq(min(na.omit(c(m))), 
+                          max(na.omit(c(m))), 
+                          length = length(color)), 2),
+       col = color,
+       pch = 15)
+
+text(x = c(rep(4.5, 3), rep(13, 2), 22), 
+     y = c(13, 22, 31, 22, 31, 31),
+     labels = rpls_val, 
+     pos = 3)
+
+text(x = c(rep(4.5, 3), rep(13, 2), 22), 
+     y = c(13, 22, 31, 22, 31, 31),
+     labels = p_val,
+     pos = 1)
+
+dev.off()
 
 #-------------------------------------------------------------------------------
 # Check if asymmetric components from head and mandi are correlated
@@ -1030,9 +1187,6 @@ mesh_x2_RM <- warpRefMesh(mesh = mesh_RM,
                           ref = x2_RM, 
                           color = "cadetblue3",
                           centered = F)
-
-
-
 
 #-------------------------------------------------------------------------------
 # Do the equivalent for the head, mirror mean shape then add or substract the 
