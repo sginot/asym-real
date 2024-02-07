@@ -362,6 +362,16 @@ mv.asym <- function(A = stop("Array with shapes must be defined"),
                         mean)
   # Matrix with replicate-average shapes 
   
+  ind <- levels(indiv.fac) 
+    
+  TA <- rep(NA, N)
+  
+  for (i in 1:N) {
+    mm <- grep(pattern = ind[i], 
+               x = row.names(mat_avg_rep))
+    TA[i] <- dist(mat_avg_rep[mm,])
+  }
+  
   iMIR <- grep("MIRROR",
                rownames(mat_avg_rep))
   
@@ -397,10 +407,10 @@ mv.asym <- function(A = stop("Array with shapes must be defined"),
                 mean)
   # Compute the average PC score across asymmetric PCs for all replicates
   
-  M <- matrix(NA, ncol = 4, nrow = N)
+  M <- matrix(NA, ncol = 5, nrow = N)
   # Prepare empty matrix for individual values of DA FA and error indices.
   
-  colnames(M) <- c("FAi", "FAi2", "DAi", "Ei")
+  colnames(M) <- c("FAi", "FAi2", "DAi", "Ei", "TAi")
   
   M[, 1] <- apply(pcs[, -1], 
                   1, 
@@ -426,6 +436,8 @@ mv.asym <- function(A = stop("Array with shapes must be defined"),
     
   }
   
+  M[, 5] <- TA
+  
   return(list(PCA.sym = pca_sym, 
               PCA.asym = pca_asym, 
               M = data.frame(M),
@@ -433,5 +445,117 @@ mv.asym <- function(A = stop("Array with shapes must be defined"),
               Procrustes = pAc,
               mirror.fac = mirror.fac,
               indiv.fac.mirror = indiv.fac.mirror))
+  
+}
+
+#-------------------------------------------------------------------------------
+# Similar function for matching symmetry
+
+
+mv.asym.match <- function(A = stop("Array with shapes must be defined"),
+                    side = stop("Vector of side is needed"),
+                    Nrep = 1,
+                    indiv.fac = as.factor(c(1:(dim(A)[3]/(Nrep + 1)), 
+                                            1:(dim(A)[3]/(Nrep + 1))))
+                    # By default, indiv.fac assumes that every individual in the 
+                    # sample has been replicated, and in the same order as the 
+                    # first series of landmarking. Otherwise it can be manually
+                    # defined.
+) {
+  
+  p <- dim(A)[1]
+  k <- dim(A)[2]
+  N <- dim(A)[3]
+  Nind <- dim(A)[3]/((Nrep + 1) * length(levels(side)))
+  ind <- levels(indiv.fac)
+
+  pA <- pgpa(A)
+  # Partial Procrustes analysis from Claude (2008)
+  
+  siz <- pA$cent.size
+  
+  oA <- orp(pA$rotated)
+  
+  sym_shapes <- array(NA,
+                      dim = c(p, k, Nind))
+  # Initiate empty array
+  
+  for (i in 1:Nind) {
+    
+    index <- which(indiv.fac == levels(indiv.fac)[i])
+    
+    sym_shapes[ , , i] <- mshape(oA[ , , index])
+    
+  } # Fill array with mean shape per individual across orientations and replicates
+  
+  mat_symshapes <- matrix(data = sym_shapes, 
+                          nrow = Nind, 
+                          ncol = p * k,
+                          byrow = T)
+  
+  pca_sym <- prcomp(mat_symshapes)
+  # Make PCA representing symmetrical variation (shapes and reflections averaged)
+  
+  mat_all <- matrix(data = oA, 
+                    nrow = dim(oA)[3], 
+                    ncol = p * k,
+                    byrow = T)
+  
+  mat_avg_rep <-  apply(mat_all, 
+                        2, 
+                        tapply, 
+                        indiv.fac:side, 
+                        mean)
+  # Matrix with replicate:side-average shapes 
+ 
+  mat_asym <- matrix(NA,
+                     nrow = Nind,
+                     ncol = p * k)
+  # Empty matrix for the L-R difference for each individual
+  
+  TA <- rep(NA, Nind)
+  # Empty vector for the total asymmetry, ie L-R distance for each individual
+  
+  for (i in 1:length(ind)) {
+    
+    mm <- grep(ind[i], rownames(mat_avg_rep))
+    mat_asym[i,] <- diff(mat_avg_rep[mm,])
+    TA[i] <- dist(mat_avg_rep[mm,])
+    
+  }
+  # Matrix of asymmetric differences (averaged replicates)
+  
+  pca_asym <- prcomp(mat_asym, 
+                     center = F, 
+                     scale. = F)
+  # PCA of asymmetric differences
+  
+  pcs <- pca_asym$x
+  # PC scores
+  
+  eig <- pca_asym$sdev^2
+  # eigenvalues
+  
+  M <- matrix(NA, ncol = 3, nrow = Nind)
+  # Prepare empty matrix for individual values of DA FA and error indices.
+  
+  colnames(M) <- c("FAi", "DAi", "TAi")
+  
+  M[, 1] <- apply(pcs[, -1], 
+                  1, 
+                  sum)
+  
+  M[, 2] <- pcs[, 1]
+  
+  M[, 3] <- TA
+  
+  
+  return(list(PCA.sym = pca_sym, 
+              PCA.asym = pca_asym, 
+              M = data.frame(M),
+              matshp = mat_all,
+              Procrustes = pA,
+              side = side,
+              indiv.fac = indiv.fac))
   
 }

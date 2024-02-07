@@ -47,7 +47,6 @@ abline(h = 0,
        v = 0,
        col = "gray")
 
-
 DA <- decomp_asym$M[, 3]
 FA <- decomp_asym$M[, 1]
 

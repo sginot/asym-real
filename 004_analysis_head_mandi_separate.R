@@ -11,12 +11,15 @@
 #-------------------------------------------------------------------------------
 
 source(file = "Rfunctions1.txt") # Functions from Claude 2008
+source(file = "001_functions.R") # Functions from Claude 2008
+
 library(scales)
 library(car)
 library(rgl)
 library(geomorph)
 library(EMMLi)
 library(paleomorph)
+library(abind)
 
 #-------------------------------------------------------------------------------
 # Raw data organisation and superimposition
@@ -49,6 +52,8 @@ for (i in 1:dim(A_LM)[3]) {
 # of the array therefore belong to the same individual.
 
 pA_mand <- pgpa(A_mand) # Partial Procrustes sumperimposition
+
+csiz_mand <- pA_mand$cent.size
 
 shp_mand <- orp(pA_mand$rotated) # Orthogonal projection into Euclidean space
 mshp_mand <- pA_mand$mshape
@@ -253,6 +258,240 @@ bilatsym_head_ventral <- bilat.symmetry(A = shp_head_ventral,
                                                          ncol = 2, 
                                                          byrow = T),
                                      RRPP = T)
+
+# Asymmetry decomposition à la Neubauer et al.
+
+decomp_asym_head <- mv.asym(A = shp_head,
+                       reorder.LM = reord_LM[1:17],
+                       Nrep = 1,
+                       along = 2,
+                       indiv.fac = ID_head)
+
+plot(decomp_asym_head$PCA.asym$x[,1:2], 
+     asp = 1)
+
+abline(h = 0,
+       v = 0,
+       col = "gray")
+
+
+decomp_asym_mand <- mv.asym.match(A = shp_mand,
+                            side = side,
+                            Nrep = 1,
+                            indiv.fac = ID_mand)
+
+plot(decomp_asym_mand$PCA.asym$x[,1:2], 
+     asp = 1,
+     xlim = c(-0.10,0))
+
+abline(h = 0,
+       v = 0,
+       col = "gray")
+
+
+# Size asymmetry can also be looked at
+
+csiz_mand_av <- matrix(tapply(X = csiz_mand, 
+                              INDEX = ID_mand:side, 
+                              FUN = mean),
+                       ncol = 2,
+                       byrow = T)
+
+TA_size_mand <- csiz_mand_av[,1] - csiz_mand_av[,2]
+
+
+DA_mand <- decomp_asym_mand$M[, 2]
+FA_mand <- decomp_asym_mand$M[, 1]
+TA_mand <- decomp_asym_mand$M[, 3]
+
+DA_head <- decomp_asym_head$M[, 3]
+FA_head <- decomp_asym_head$M[, 1]
+TA_head <- decomp_asym_head$M[, 5]
+
+#-------------------------------------------------------------------------------
+# Various correlation tests between size, bite force, asymmetry
+#-------------------------------------------------------------------------------
+
+cor.test(csiz.av, FA_mand)
+cor.test(csiz.av, FA_head)
+
+cor.test(bf2, FA_head)
+cor.test(bf2, FA_mand)
+
+cor.test(FA_head, FA_mand)
+cor.test(DA_head, DA_mand)
+cor.test(TA_head, TA_mand)
+
+cor.test(TA_size_mand, TA_mand) #significant
+cor.test(TA_size_mand, TA_head)
+
+cor.test(csiz.av, DA_head) #significant
+cor.test(csiz.av, DA_mand)
+
+cor.test(bf2, DA_head)
+cor.test(bf2, DA_mand)
+
+cor.test(csiz.av, TA_head) #significant
+cor.test(csiz.av, TA_mand)
+cor.test(csiz.av, TA_size_mand) #significant
+
+cor.test(bf2, TA_head)
+cor.test(bf2, TA_mand)
+
+#-------------------------------------------------------------------------------
+# Models for the impact of asymmetry on bite force
+#-------------------------------------------------------------------------------
+
+# Define function producing linear and quadratic regression model and plots for
+# two given variables
+
+lm.qm <- function(x = x, 
+                  y = y,
+                  plot = T,
+                  xlab = "x",
+                  ylab ="y") {
+  
+  lmod <- lm(y ~ x)
+  
+  xsq <- x^2
+  
+  qmod <- lm(y ~ x + xsq)
+  
+  newval <- seq(min(x), 
+                max(x),
+                by = 0.001)
+  
+  newdata <- data.frame(x = newval,
+                        xsq = newval^2)
+    
+  predq <- predict(qmod,
+                   newdata = newdata)
+  
+  if (plot) {
+    plot(x, 
+         y, 
+         pch = 19, 
+         cex = 1.5,
+         xlab = xlab,
+         ylab = ylab)
+    lines(newval,
+          predq,
+          lwd = 2)
+    abline(lmod, 
+           lty = 2,
+           lwd = 2)
+  }
+  
+  list(linear.model = summary(lmod),
+         quadratic.model = summary(qmod))
+}
+
+DA_head_mods <- lm.qm(x = DA_head, y = bf2)
+DA_mand_mods <- lm.qm(x = DA_mand, y = bf2)
+
+FA_head_mods <- lm.qm(x = FA_head, y = bf2)
+FA_mand_mods <- lm.qm(x = FA_mand, y = bf2)
+
+TA_head_mods <- lm.qm(x = TA_head, y = bf2)
+TA_mand_mods <- lm.qm(x = TA_mand, y = bf2)
+
+TA_siz_mods <- lm.qm(x = TA_size_mand, y = bf2)
+
+# Plot the results
+
+pdf(file = paste(output_folder,
+                 "bite_force_asym_regressions.pdf",
+                 sep = "/"),
+    width = 10,
+    height = 10)
+
+layout(matrix(c(1:5, 8, 6:7, 8), 
+              ncol = 3,
+              byrow = T))
+
+par(mar = c(4.5,4.5,1,1), cex.lab = 1.5)
+
+lm.qm(x = TA_head,
+      y = bf2, 
+      xlab = "Head capsule total asymmetry", 
+      ylab = "Bite force")
+
+lm.qm(x = TA_mand, 
+      y = bf2,
+      xlab = "Mandible total asymmetry", 
+      ylab = "Bite force")
+
+lm.qm(x = TA_size_mand, 
+      y = bf2,
+      xlab = "Mandible size asymmetry", 
+      ylab = "Bite force")
+
+lm.qm(x = DA_head, 
+      y = bf2,
+      xlab = "Head directional asymmetry", 
+      ylab = "Bite force")
+
+lm.qm(x = DA_mand, 
+      y = bf2,
+      xlab = "Mandible directional asymmetry", 
+      ylab = "Bite force")
+
+lm.qm(x = FA_head,
+      y = bf2,
+      xlab = "Head fluctuating asymmetry", 
+      ylab = "Bite force")
+lm.qm(x = FA_mand,
+      y = bf2,
+      xlab = "Mandible fluctuating asymmetry", 
+      ylab = "Bite force")
+
+par(mar = c(1,1,1,1))
+
+plot(1, 1,
+     type = "n", 
+     bty = "n", 
+     xaxt = "n", 
+     yaxt = "n", 
+     ylab = "", 
+     xlab = "")
+
+text(1,1, 
+     labels = "All P > 0.1", 
+     pos = 3, 
+     cex = 2)
+
+text(1,1, 
+     labels = "All R^2 < 0.1", 
+     pos = 1, 
+     cex = 2)
+
+legend("topleft", 
+       lty = c(1, 2), 
+       lwd = 2, 
+       legend = c("Quadratic regression", "Linear regression"),
+       cex = 2)
+
+dev.off()
+
+#-------------------------------------------------------------------------------
+# Coefficient of variation analysis (compare with Pelabon & Hansen 2008)
+#-------------------------------------------------------------------------------
+
+CVTA_mand <- sd(TA_mand, na.rm = T)/mean(TA_mand, na.rm = T)
+CVTA_siz_mand <- sd(TA_size_mand, na.rm = T)/mean(TA_size_mand, na.rm = T)
+CVTA_head <- sd(TA_head, na.rm = T)/mean(TA_head, na.rm = T)
+
+CVDA_mand <- sd(DA_mand, na.rm = T)/mean(abs(DA_mand), na.rm = T)
+CVDA_head <- sd(DA_head, na.rm = T)/mean(abs(DA_head), na.rm = T)
+
+CVFA_mand <- sd(FA_mand, na.rm = T)/mean(abs(FA_mand), na.rm = T)
+CVFA_head <- sd(FA_head, na.rm = T)/mean(abs(FA_head), na.rm = T)
+
+CVBF2 <- sd(bf2, na.rm = T)/mean(bf2, na.rm = T)
+
+CVHL <- sd(head_l, na.rm = T)/mean(head_l, na.rm = T)
+
+CVsiz <- sd(csiz, na.rm = T)/mean(csiz, na.rm = T)
 
 #-------------------------------------------------------------------------------
 # Test for 2BPLS relation between shape components and bf
