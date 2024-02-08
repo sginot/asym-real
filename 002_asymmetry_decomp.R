@@ -8,7 +8,7 @@ source("001_functions.R")
 source("002_asym_components.R")
 source("Rfunctions1.txt")
 library(rgl)
-options(rgl.printRglwidget = TRUE)
+#options(rgl.printRglwidget = TRUE)
 #options(browser = "opera") #Can be modified (some bugs with firefox)
 
 #-------------------------------------------------------------------------------
@@ -16,15 +16,15 @@ options(rgl.printRglwidget = TRUE)
 
 # 1st step: need to have landmarks after mirroring in the proper order.
 
-#reord_LM <- c(1,2,12,11,9,8,10,6,5,7,4,3,13,15,14,17,16,21,22,23,18,19,20,
-#              25,24,30,31,32,33,26,27,28,29,35,34)
+reord_LM <- c(1,2,12,11,9,8,10,6,5,7,4,3,13,15,14,17,16,21,22,23,18,19,20,
+              25,24,30,31,32,33,26,27,28,29,35,34)
 # If bug with rgl, use this vector instead of running the next line
 
 #reord_LM <- locate.reorder(shape = pA$mshape,
 #                           along = 2)
 
-reord_LM <- locate.reorder(shape = pA$mshape[,2:3],
-                           along = 1)
+#reord_LM <- locate.reorder(shape = pA$mshape[,2:3],
+#                           along = 1)
 # Or if rgl does not work, use this 2D alternative.
 
 # Asymmetry decomposition à la Neubauer et al.

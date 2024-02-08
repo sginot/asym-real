@@ -7,7 +7,7 @@ library(scales)
 library(car)
 library(rgl)
 library(geomorph)
-options(rgl.printRglwidget = TRUE)
+#options(rgl.printRglwidget = TRUE)
 #options(browser = "opera") #Can be modified (some bugs with firefox)
 
 #-------------------------------------------------------------------------------

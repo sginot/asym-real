@@ -267,27 +267,71 @@ decomp_asym_head <- mv.asym(A = shp_head,
                        along = 2,
                        indiv.fac = ID_head)
 
-plot(decomp_asym_head$PCA.asym$x[,1:2], 
-     asp = 1)
-
-abline(h = 0,
-       v = 0,
-       col = "gray")
-
 
 decomp_asym_mand <- mv.asym.match(A = shp_mand,
                             side = side,
                             Nrep = 1,
                             indiv.fac = ID_mand)
 
-plot(decomp_asym_mand$PCA.asym$x[,1:2], 
+# Plot both PCAs
+
+varPC_head <-   round(decomp_asym_head$PCA.asym$sdev^2 / 
+                sum(decomp_asym_head$PCA.asym$sdev^2) * 100, 
+                2)
+varPC_mand <-   round(decomp_asym_mand$PCA.asym$sdev^2 / 
+                        sum(decomp_asym_mand$PCA.asym$sdev^2) * 100, 
+                      2)
+
+pdf(file = paste(output_folder, 
+                 "Asym_PCA.pdf", sep = "/"),
+    width = 10,
+    height = 5)
+
+layout(matrix(1:2, ncol = 2))
+
+plot(decomp_asym_head$PCA.asym$x[,1:2], 
      asp = 1,
-     xlim = c(-0.10,0))
+     pch = 21,
+     cex = 1.5,
+     bg = "grey",
+     xlim = c(max(abs(decomp_asym_head$PCA.asym$x[,1])),
+              -max(abs(decomp_asym_head$PCA.asym$x[,1]))),
+     main = "A. Head capsule",
+     xlab = paste("PC1", 
+                  varPC_head[1], 
+                  "%", 
+                  sep = " "),
+     ylab = paste("PC2", 
+                  varPC_head[2], 
+                  "%", 
+                  sep = " "))
 
 abline(h = 0,
        v = 0,
        col = "gray")
 
+plot(decomp_asym_mand$PCA.asym$x[,1:2], 
+     asp = 1,
+     pch = 21,
+     cex = 1.5,
+     main = "B. Mandibles",
+     bg = "grey",
+     xlim = c(max(abs(decomp_asym_mand$PCA.asym$x[,1])),
+              -max(abs(decomp_asym_mand$PCA.asym$x[,1]))),
+     xlab = paste("PC1", 
+                  varPC_mand[1], 
+                  "%", 
+                  sep = " "),
+     ylab = paste("PC2", 
+                  varPC_mand[2], 
+                  "%", 
+                  sep = " "))
+
+abline(h = 0,
+       v = 0,
+       col = "gray")
+
+dev.off()
 
 # Size asymmetry can also be looked at
 
@@ -315,9 +359,6 @@ TA_head <- decomp_asym_head$M[, 5]
 cor.test(csiz.av, FA_mand)
 cor.test(csiz.av, FA_head)
 
-cor.test(bf2, FA_head)
-cor.test(bf2, FA_mand)
-
 cor.test(FA_head, FA_mand)
 cor.test(DA_head, DA_mand)
 cor.test(TA_head, TA_mand)
@@ -328,15 +369,20 @@ cor.test(TA_size_mand, TA_head)
 cor.test(csiz.av, DA_head) #significant
 cor.test(csiz.av, DA_mand)
 
-cor.test(bf2, DA_head)
-cor.test(bf2, DA_mand)
 
 cor.test(csiz.av, TA_head) #significant
 cor.test(csiz.av, TA_mand)
 cor.test(csiz.av, TA_size_mand) #significant
 
+cor.test(bf2, FA_head)
+cor.test(bf2, FA_mand)
+
+cor.test(bf2, DA_head)
+cor.test(bf2, DA_mand)
+
 cor.test(bf2, TA_head)
 cor.test(bf2, TA_mand)
+cor.test(bf2, TA_size_mand)
 
 #-------------------------------------------------------------------------------
 # Models for the impact of asymmetry on bite force
@@ -497,43 +543,26 @@ CVsiz <- sd(csiz, na.rm = T)/mean(csiz, na.rm = T)
 # Test for 2BPLS relation between shape components and bf
 #-------------------------------------------------------------------------------
 
-bf_sym_head_pls <- two.b.pls(A1 = bilatsym_head$symm.shape[,,-which(is.na(bf2))], 
-                             A2 = bf2[-which(is.na(bf2))])
-bf_asym_head_pls <- two.b.pls(A1 = bilatsym_head$asymm.shape[,,-which(is.na(bf2))], 
-                              A2 = bf2[-which(is.na(bf2))])
+NA_BF <- which(is.na(bf2))
 
-bf_sym_mand_pls <- two.b.pls(A1 = bilatsym_mand$symm.shape[,,-which(is.na(bf2))], 
-                             A2 = bf2[-which(is.na(bf2))])
-bf_asym_mand_pls <- two.b.pls(A1 = bilatsym_mand$asymm.shape[,,-which(is.na(bf2))], 
-                              A2 = bf2[-which(is.na(bf2))])
+bf_L_mand_pls <- two.b.pls(A1 = A_overall[which(part_overall2 == "LM"),,-NA_BF], 
+                        A2 = bf2[-NA_BF])
 
-#-------------------------------------------------------------------------------
-# Test for modularity within the head only and between superimposed mandibles
-# Then test for integration between each mandible and with head modules if 
-# significant head modularity is found
-#-------------------------------------------------------------------------------
+bf_R_mand_pls <- two.b.pls(A1 = A_overall[which(part_overall2 == "RM"),,-NA_BF], 
+                           A2 = bf2[-NA_BF])
 
-mod_test_head <- modularity.test(A = shp_head,
-                                 partition.gp = modu_head[,1],
-                                 iter = 999, 
-                                 CI = T)
+bf_head_pls <- two.b.pls(A1 = A_overall[which(part_overall == "head"),,-NA_BF], 
+                           A2 = bf2[-NA_BF])
 
-integ_test_head <- integration.test(A = shp_head,
-                                    partition.gp = modu_head[,1],
-                                    iter = 999)
+bf_sym_head_pls <- two.b.pls(A1 = bilatsym_head$symm.shape[,,-NA_BF], 
+                             A2 = bf2[-NA_BF])
+bf_asym_head_pls <- two.b.pls(A1 = bilatsym_head$asymm.shape[,,-NA_BF], 
+                              A2 = bf2[-NA_BF])
 
-integ_test_3mod <- integration.test(A = A_overall,
-                                    partition.gp = part_overall,
-                                    iter = 999)
-
-integ_test_4mod <- integration.test(A = A_overall,
-                                    partition.gp = part_overall2,
-                                    iter = 999)
-
-mod_test_mand <- modularity.test(A = A_overall[18:35,,],
-                                 partition.gp = droplevels(part_overall[18:35]),
-                                 iter = 999, 
-                                 CI = T)
+bf_sym_mand_pls <- two.b.pls(A1 = bilatsym_mand$symm.shape[,,-NA_BF], 
+                             A2 = bf2[-NA_BF])
+bf_asym_mand_pls <- two.b.pls(A1 = bilatsym_mand$asymm.shape[,,-NA_BF], 
+                              A2 = bf2[-NA_BF])
 
 #-------------------------------------------------------------------------------
 # Compute covariance / correlation patterns
@@ -598,6 +627,40 @@ for (i in 1:dim(av_cor)[1]) {
   }
 }
 
+#-------------------------------------------------------------------------------
+# Test for modularity within the head only and between superimposed mandibles
+# Then test for integration between each mandible and with head modules if 
+# significant head modularity is found
+#-------------------------------------------------------------------------------
+
+mod_test_head <- modularity.test(A = A_overall[1:17,,],
+                                 partition.gp = modu_head[,1],
+                                 iter = 999, 
+                                 CI = T)
+
+integ_test_head <- integration.test(A = A_overall[1:17,,],
+                                    partition.gp = modu_head[,1],
+                                    iter = 999)
+
+integ_test_3mod <- integration.test(A = A_overall,
+                                    partition.gp = part_overall,
+                                    iter = 999)
+
+integ_test_4mod <- integration.test(A = A_overall,
+                                    partition.gp = part_overall2,
+                                    iter = 999)
+
+mod_test_mand <- modularity.test(A = A_overall[18:35,,],
+                                 partition.gp = droplevels(part_overall2[18:35]),
+                                 iter = 999, 
+                                 CI = T)
+
+rpls_val <- paste("r-PLS =", 
+                  round(integ_test_4mod$r.pls.mat, 3))
+
+p_val <- paste("P =", integ_test_4mod$pairwise.P.values)
+
+parts <- levels(part_overall2)
 #-------------------------------------------------------------------------------
 # Covariance / correlation matrix heatmap plots
 #-------------------------------------------------------------------------------
@@ -778,13 +841,6 @@ lab_congro <- lab_congru
 lab_congro[1:17] <- lab_congru[order(modu_head[,1])] # Order head LMs names by 
                                                     # the module they belong to
 
-rpls_val <- paste("r-PLS =", 
-                  round(integ_test_4mod$r.pls.mat, 3))
-
-p_val <- paste("P =", integ_test_4mod$pairwise.P.values)
-
-parts <- levels(part_overall2)
-
 pdf(file = paste(output_folder, 
                  "LM_correlation_module_congruence.pdf",
                  sep = "/"),
@@ -854,19 +910,21 @@ dev.off()
 # Possible artifact from alignment of left and right mandibles. May artificially
 # increase correlation between homologous landmarks
 
+
+
 #-------------------------------------------------------------------------------
 # Global figure with landmark template and matrices heatmaps
 #-------------------------------------------------------------------------------
 
 pdf(file = paste(output_folder, 
-                 "Landmark_modules_template.pdf",
+                 "Landmark_template_and_covariation.pdf",
                  sep = "/"),
     width = 16,
     height = 16)
 
 layout(matrix(1:4, ncol = 2,
               byrow = T),
-       widths = c(0.4, 0.6))
+       widths = c(0.45, 0.55))
 
 par(mar = c(1,1,1,1))
 
@@ -879,7 +937,8 @@ plot(x = arr[,2,1],
      main = "A. Landmarks and modules",
      axes = F,
      xlab = "",
-     ylab = "")
+     ylab = "", 
+     cex.main = 1.5)
 
 text(x = arr[,2,1],
      y = arr[,3,1],
@@ -914,11 +973,12 @@ image(x = 1:dim(mcov)[1],
       y = 1:dim(mcov)[1], 
       z = mcov, 
       col = color,
-      main = "B. Landmarks covariance matrix",
+      main = "B. Coordinate covariance matrix",
       xlab = "",
       ylab = "",
       xaxt = "n",
-      yaxt = "n")
+      yaxt = "n",
+      cex.main = 1.5)
 
 abline(h = c(24.5, 51.5, 78.5),
        v = c(24.5, 51.5, 78.5),
@@ -935,23 +995,24 @@ text(x = c(rep(12.5, 4),
      labels = paste(na.omit(c(round(av_cov * 10^6, 2))), 
                     "*10^-6"),
      pos = 3,
-     srt = 45)
+     srt = 45,
+     cex = 1.5)
 
 axis(side = 1, 
      at =  c(12.5, 37.5, 63.5, 91.5), 
      labels = parts, 
      font = 2,
-     las = 1, 
-     col = 1:4)
+     las = 1,
+     cex.axis = 1.5)
 
 axis(side = 2, 
      at =  c(12.5, 37.5, 63.5, 91.5), 
      labels = parts, 
      font = 2, 
      las = 3, 
-     col = 1:4)
+     cex.axis = 1.5)
 
-par(mar = c(2.5, 2, 6, 10))
+par(mar = c(2.5, 2, 6, 11))
 
 image(x = 1:dim(m)[1], 
       y = 1:dim(m)[1], 
@@ -963,7 +1024,7 @@ image(x = 1:dim(m)[1],
       yaxt = "n")
 
 title(main = "C. Landmarks congruence matrix",
-      line = 5)
+      line = 5, cex.main = 1.5)
 
 abline(v = c(8.5, 17.5, 26.5),
        h = c(8.5, 17.5, 26.5),
@@ -974,22 +1035,27 @@ axis(side = 1,
      at =  c(4.5, 13, 22, 31), 
      labels = parts, 
      font = 2,
-     las = 1)
+     las = 1,
+     cex.axis = 1.5)
 
 axis(side = 2, 
      at =  c(4.5, 13, 22, 31), 
      labels = parts, 
-     font = 2, las = 3)
+     font = 2, 
+     las = 3,
+     cex.axis = 1.5)
 
 axis(side = 4, 
      at = 1:dim(congro_overall)[2], 
      labels = lab_congro, 
-     las = 2)
+     las = 2, 
+     cex.axis = 1.2)
 
 axis(side = 3, 
      at = 1:dim(congro_overall)[2], 
      labels = lab_congro, 
-     las = 2)
+     las = 2, 
+     cex.axis = 1.2)
 
 legend(x = 40,
        y = 35.5,
@@ -998,17 +1064,18 @@ legend(x = 40,
                           max(na.omit(c(m))), 
                           length = length(color)), 2),
        col = color,
-       pch = 15)
+       pch = 15, 
+       cex = 1.2)
 
 text(x = c(rep(4.5, 3), rep(13, 2), 22), 
      y = c(13, 22, 31, 22, 31, 31),
      labels = rpls_val, 
-     pos = 3)
+     pos = 3, cex = 1.5)
 
 text(x = c(rep(4.5, 3), rep(13, 2), 22), 
      y = c(13, 22, 31, 22, 31, 31),
      labels = p_val,
-     pos = 1)
+     pos = 1, cex = 1.5)
 
 dev.off()
 
@@ -1481,7 +1548,7 @@ antview2 <- matrix(c(0.03, 0.07,  0.99,  0.00,
 par3d(windowRect = c(50, 50, 3000, 1000),
       userMatrix = antview2)
 
-newSubscene3d(newviewport = c(-400, -500, 1500, 2000))
+newSubscene3d(newviewport = c(-500, -500, 1500, 2000))
 plot3d(mesh_x2_mirror_head, 
        box = F, 
        axes = F, 
@@ -1513,7 +1580,7 @@ plot3d(mirror_mshp_head,
        type = "s",
        size = 1)
 
-newSubscene3d(newviewport = c(400, -500, 1500, 2000))
+newSubscene3d(newviewport = c(500, -500, 1500, 2000))
 plot3d(mesh_sym_head, 
        box = F, 
        axes = F, 
@@ -1530,7 +1597,7 @@ plot3d(sym_head,
        type = "s",
        size = 1)
 
-newSubscene3d(newviewport = c(800, -500, 1500, 2000))
+newSubscene3d(newviewport = c(1000, -500, 1500, 2000))
 plot3d(mesh_mshp_head, 
        box = F,
        axes = F, 
@@ -1546,7 +1613,7 @@ plot3d(mshp_head,
        type = "s",
        size = 1)
 
-newSubscene3d(newviewport = c(1200, -500, 1500, 2000))
+newSubscene3d(newviewport = c(1500, -500, 1500, 2000))
 plot3d(mesh_x2_head, 
        box = F, 
        axes = F, 
@@ -1661,7 +1728,7 @@ postview2 <- matrix(c(0.10, -0.15, -0.99,  0.00,
 par3d(windowRect = c(50, 50, 3000, 1000),
       userMatrix = postview2)
 
-newSubscene3d(newviewport = c(-300, -500, 1500, 2000))
+newSubscene3d(newviewport = c(-500, -500, 1500, 2000))
 plot3d(mesh_x2_mirror_head, 
        box = F, 
        axes = F, 
@@ -1677,7 +1744,7 @@ plot3d(x2_mirror_head,
        type = "s",
        size = 1.5)
 
-newSubscene3d(newviewport = c(100, -500, 1500, 2000))
+newSubscene3d(newviewport = c(0, -500, 1500, 2000))
 plot3d(mesh_mirror_mshp_head, 
        box = F, 
        axes = F, 
@@ -1709,7 +1776,7 @@ plot3d(sym_head,
        type = "s",
        size = 1.5)
 
-newSubscene3d(newviewport = c(900, -500, 1500, 2000))
+newSubscene3d(newviewport = c(1000, -500, 1500, 2000))
 plot3d(mesh_mshp_head, 
        box = F,
        axes = F, 
@@ -1725,7 +1792,7 @@ plot3d(mshp_head,
        type = "s",
        size = 1.5)
 
-newSubscene3d(newviewport = c(1300, -500, 1500, 2000))
+newSubscene3d(newviewport = c(1500, -500, 1500, 2000))
 plot3d(mesh_x2_head, 
        box = F, 
        axes = F, 
