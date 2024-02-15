@@ -34,11 +34,14 @@ LM_RM <- c(17, 21:23, 25, 30:33) # Index of landmarks for left mandible
 LM_LM <- c(16, 18:20, 24, 26:29) # Index of LMs for right mandible
 
 A_head <- arr[-c(LM_LM, LM_RM),,] # Array containing only head LMs
+rownames(A_head) <- DF$abbrev[-c(LM_LM, LM_RM)]
 
 A_LM <- arr[c(LM_LM),,] # Array containing only left mandible landmarks
 A_LM[, 2, ] <- -1 * A_LM[, 2, ] # Mirror configurations along medio-lateral axis
+rownames(A_LM) <- DF$abbrev[LM_LM]
 
 A_RM <- arr[c(LM_RM),,] # Array containing only right mandible landmarks
+rownames(A_RM) <- DF$abbrev[LM_RM]
 
 A_mand <- array(data = NA, #Empty array to gather mandible shape data
                 dim = c(dim(A_LM)[1:2], 
@@ -84,11 +87,22 @@ ID_mand <- rep(ID, each = 2) # Same vector, with duplicated elements because
 replic_head <- replic
 replic_mand <- rep(replic, each = 2)
 
+dimnames(shp_head) <- list(DF$abbrev[-c(LM_LM, LM_RM)], 
+                           c("x","y","z"), 
+                           paste(ID, replic_head, sep = "_"))
+
+dimnames(shp_mand) <- list(DF$abbrev[LM_LM], 
+                           c("x","y","z"), 
+                           paste(ID_mand, side, replic_mand, sep = "_"))
+# Note that rownames for shp_mand cannot be different for left and right mandi
+
 #-------------------------------------------------------------------------------
-# Define output folder for plots
+# Define output folder for plots and color palette
 #-------------------------------------------------------------------------------
 
 output_folder <- "./Figures"
+
+palette(palette.colors(palette = "Okabe-Ito"))
 
 #-------------------------------------------------------------------------------
 # Define modules for the split up coordinates matrices
@@ -97,7 +111,10 @@ output_folder <- "./Figures"
 modu_head <- DF[which(DF[,6] == 1 | DF[,6] ==  4), 
                 c(6, 10)] # 2-modules split for the head
 
-modo_head <- modu_head[order(modu_head[,1]),] # Reordered landmarks
+head_ord <- c(17, 16, 8, 6, 10, 7, 13, 9, 5,
+              15, 14, 11, 4, 1, 12, 3, 2)
+
+modo_head <- modu_head[head_ord,] # Reordered landmarks
 
 part_overall <- as.factor(c(rep("head", 17), 
                             rep("LM", 9), 
@@ -107,11 +124,9 @@ part_overall2 <- as.factor(c(modu_head[,1],
                              rep("LM", 9), 
                              rep("RM", 9)))
 
-levels(part_overall2)[1:2] <- c("head", "sensory")
+levels(part_overall2)[1:2] <- c("ventral", "sensory")
 
 modu_overall <- rep(part_overall2, each = 3)
-
-modo_overall <- modu_overall[order(modu_overall)]
 
 #-------------------------------------------------------------------------------
 # For analyses not requiring replicates, shapes are averaged across replicates
@@ -134,6 +149,10 @@ mat_shp_mand_av <- apply(X = mat_shp_mand,
                          INDEX = ID_mand:side, 
                          mean)
 
+colnames(mat_shp_mand_av) <- paste(rep(rownames(shp_mand),
+                                       each =3),
+                                   colnames(shp_mand[,,1]))
+
 # individual average for the head
 
 mat_shp_head <- matrix(NA, 
@@ -147,6 +166,10 @@ mat_shp_head_av <- apply(X = mat_shp_head,
                          FUN = tapply, 
                          INDEX = ID_head, 
                          mean)
+
+colnames(mat_shp_head_av) <- paste(rep(rownames(shp_head),
+                                       each =3),
+                                   colnames(shp_head[,,1]))
 
 # Make global coordinate matrix, combining left and right mandible with head for
 # each individual (each row represents one individual)
@@ -170,6 +193,14 @@ for (i in 1:dim(mat_overall)[1]) {
 }
 
 rownames(mat_overall) <- rownames(mat_shp_head_av)
+
+colnames(mat_overall) <- c(colnames(mat_shp_head_av),
+                           paste(rep(DF$abbrev[LM_LM],
+                                          each = 3), 
+                                      c("x", "y", "z")),
+                           paste(rep(DF$abbrev[LM_RM],
+                                     each = 3), 
+                                 c("x", "y", "z")))
 
 #-------------------------------------------------------------------------------
 # Asymmetry analyses
@@ -589,35 +620,56 @@ for (i in 1:dim(A_overall)[3]) {
                            byrow = T)
   } # Fill array with values, ie reconstitute a configuration array, but with
     # modified order of landmarks, as found in mat_overall
+dimnames(A_overall) <- list(c(DF$abbrev[-c(LM_LM, LM_RM)], 
+                              DF$abbrev[LM_LM], 
+                              DF$abbrev[LM_RM]),
+                            c("x","y","z"),
+                            rownames(mat_overall))
 
 congru_overall <- abs(dotcorr(A_overall))
 
-# Reorder LMs in the congruence matrix so that they are grouped according to
-# the two head modules.
-congro_overall <- congru_overall
-congro_overall[1:17, 1:17] <- congro_overall[order(modu_head[,1]),
-                                             order(modu_head[,1])]
+rownames(congru_overall) <- 
+  colnames(congru_overall) <- 
+  dimnames(A_overall)[[1]]
+
+# Reorder LMs in the matrices so that they are grouped according to
+# modules, and with a dorso-ventral sequence.
+
+DV_ord <- c(17, 16, 8, 6, 10, 7, 13, 9, 5,
+            15, 14, 11, 4, 1, 12, 3, 2,
+            34, 35, 31, 32, 33, 27, 30, 29, 28,
+            25, 26, 22, 23, 24, 18, 21, 20, 19)
+
+DV_ord3D <- c(rbind(DV_ord * 3 - 2, DV_ord * 3 - 1, DV_ord * 3))
+
+modo_overall <- modu_overall[DV_ord3D]
+
+congro_overall <- congru_overall[DV_ord, DV_ord]
 
 m <- congro_overall
 m[upper.tri(congro_overall, diag = T)] <- NA # Make half empty matrix
 
-mcov <- cov_overall[order(modu_overall), order(modu_overall)]
+mcov <- cov_overall[DV_ord3D, DV_ord3D]
 mcov[upper.tri(mcov, diag = T)] <- NA 
 
-mcor <- cor_overall[order(modu_overall), order(modu_overall)]
+mcor <- cor_overall[DV_ord3D, DV_ord3D]
 mcor[upper.tri(mcor, diag = T)] <- NA 
 
 av_cov <- av_cor <- matrix(NA, 
                            ncol = length(levels(modo_overall)),
                            nrow = length(levels(modo_overall)))
 
-colnames(av_cov) <- colnames(av_cor) <- rownames(av_cov) <- rownames(av_cor) <- levels(modo_overall)
+colnames(av_cov) <- 
+  colnames(av_cor) <- 
+  rownames(av_cov) <- 
+  rownames(av_cor) <- 
+  unique(modo_overall)
 
 for (i in 1:dim(av_cor)[1]) {
   for (j in 1:dim(av_cor)[1]) {
   
-  levi <- levels(modo_overall)[i]
-  levj <- levels(modo_overall)[j]
+  levi <- unique(modo_overall)[i]
+  levj <- unique(modo_overall)[j]
   
   wi <- which(modo_overall == levi)
   wj <- which(modo_overall == levj)
@@ -916,13 +968,14 @@ dev.off()
 # Global figure with landmark template and matrices heatmaps
 #-------------------------------------------------------------------------------
 
+
 pdf(file = paste(output_folder, 
                  "Landmark_template_and_covariation.pdf",
                  sep = "/"),
     width = 16,
     height = 16)
 
-layout(matrix(1:4, ncol = 2,
+layout(matrix(c(1,1,2,3), ncol = 2,
               byrow = T),
        widths = c(0.45, 0.55))
 
@@ -938,7 +991,9 @@ plot(x = arr[,2,1],
      axes = F,
      xlab = "",
      ylab = "", 
-     cex.main = 1.5)
+     cex.main = 1.5,
+     xlim = c(min(arr[,2,1]),
+              max(arr[,2,1]) * 5))
 
 text(x = arr[,2,1],
      y = arr[,3,1],
@@ -951,27 +1006,30 @@ text(x = arr[,2,1],
              rep(1,7), 2, 3, 1, 4, 3, 2, 
              4, 3, 4, 3, 1, 3, 2, 3, 1))
 
-plot(1,1, 
-     type = "n", 
-     bty = "n", 
-     xaxt = "n", 
-     yaxt = "n",
-     xlab = "",
-     ylab = "")
+text(x = rep(4.8, 4),
+     y = c(-3.4, -1, 1.2, 3.4),
+     labels = c("Left Mandible", 
+                "Right Mandible", 
+                "Head-Ventral", 
+                "Head-Sensory"),
+     col = c(2, 3, 1, 4),
+     srt = 90, 
+     cex = 1.5,
+     font = 2)
 
-legend("topleft", 
-       legend = paste(DF$abbrev[order(DF[,6])], 
-                      DF$name[order(DF[,6])],
+legend("topright", 
+       legend = paste(DF$abbrev[DV_ord], 
+                      DF$name[DV_ord],
                       sep = " - "),
-       text.col = DF[order(DF[,6]), 6],
+       text.col = DF[DV_ord, 6],
        bty = "n",
        cex = 1.3)
 
 par(mar = c(2.5, 3, 6, 1))
 
-image(x = 1:dim(mcov)[1], 
-      y = 1:dim(mcov)[1], 
-      z = mcov, 
+image(x = 1:dim(mc)[1], 
+      y = 1:dim(mc)[1], 
+      z = mc, 
       col = color,
       main = "B. Coordinate covariance matrix",
       xlab = "",
