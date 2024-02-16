@@ -710,9 +710,15 @@ mod_test_mand <- modularity.test(A = A_overall[18:35,,],
 rpls_val <- paste("r-PLS =", 
                   round(integ_test_4mod$r.pls.mat, 3))
 
+rplso <- rpls_val[c(1, 5, 4, 3, 2, 6)]
+
 p_val <- paste("P =", integ_test_4mod$pairwise.P.values)
 
+p_valo <- p_val[c(1, 5, 4, 3, 2, 6)]
+  
 parts <- levels(part_overall2)
+
+
 #-------------------------------------------------------------------------------
 # Covariance / correlation matrix heatmap plots
 #-------------------------------------------------------------------------------
@@ -968,6 +974,10 @@ dev.off()
 # Global figure with landmark template and matrices heatmaps
 #-------------------------------------------------------------------------------
 
+reord <- match(rownames(m), DF$abbrev)
+
+parts2 <- c("Sensory", "Ventral", "RM", "LM")
+
 
 pdf(file = paste(output_folder, 
                  "Landmark_template_and_covariation.pdf",
@@ -1018,105 +1028,158 @@ text(x = rep(4.8, 4),
      font = 2)
 
 legend("topright", 
-       legend = paste(DF$abbrev[DV_ord], 
-                      DF$name[DV_ord],
+       legend = paste(DF$abbrev[reord], 
+                      DF$name[reord],
                       sep = " - "),
-       text.col = DF[DV_ord, 6],
+       text.col = DF[reord, 6],
        bty = "n",
        cex = 1.3)
 
 par(mar = c(2.5, 3, 6, 1))
 
-image(x = 1:dim(mc)[1], 
-      y = 1:dim(mc)[1], 
-      z = mc, 
+image(x = 1:dim(mcov)[1], 
+      y = 1:dim(mcov)[1], 
+      z = t(mcov), 
       col = color,
       main = "B. Coordinate covariance matrix",
       xlab = "",
       ylab = "",
       xaxt = "n",
       yaxt = "n",
-      cex.main = 1.5)
+      cex.main = 1.5,
+      ylim = c(105.5, 0.5), 
+      xlim = c(0.5, 105.5))
 
-abline(h = c(24.5, 51.5, 78.5),
-       v = c(24.5, 51.5, 78.5),
+abline(h = c(27.5, 51.5, 78.5),
+       v = c(27.5, 51.5, 78.5),
        col = "grey",
        lwd = 3)
 
-text(x = c(rep(12.5, 4), 
-           rep(37.5, 3), 
-           rep(63.5, 2), 91.5),
-     y = c(12.5, 37.5, 63.5, 91.5, 
-           37.5, 63.5, 91.5, 
-           63.5, 91.5, 
-           91.5),
-     labels = paste(na.omit(c(round(av_cov * 10^6, 2))), 
-                    "*10^-6"),
-     pos = 3,
-     srt = 45,
-     cex = 1.5)
-
 axis(side = 1, 
-     at =  c(12.5, 37.5, 63.5, 91.5), 
-     labels = parts, 
+     at =  c(14, 40, 65, 92), 
+     labels = parts2, 
      font = 2,
      las = 1,
      cex.axis = 1.5)
 
 axis(side = 2, 
-     at =  c(12.5, 37.5, 63.5, 91.5), 
-     labels = parts, 
+     at =  c(14, 40, 65, 92), 
+     labels = parts2, 
      font = 2, 
      las = 3, 
      cex.axis = 1.5)
+
+text(y = c(rep(14, 4), 
+           rep(40, 3), 
+           rep(65, 2), 92),
+     x = c(14, 40, 65, 92, 
+           40, 65, 92, 
+           65, 92, 
+           92),
+     labels = paste(na.omit(c(round(av_cov * 10^6, 2))), 
+                    "*10^-6"),
+     pos = 3,
+     srt = -45,
+     cex = 1.5)
 
 par(mar = c(2.5, 2, 6, 11))
 
 image(x = 1:dim(m)[1], 
       y = 1:dim(m)[1], 
-      z = m, 
+      z = t(m), 
       col = color,
       xlab = "",
       ylab = "",
       xaxt = "n",
-      yaxt = "n")
+      yaxt = "n", xlim = c(0.5, 35.5), ylim = c(35.5, 0.5))
 
 title(main = "C. Landmarks congruence matrix",
       line = 5, cex.main = 1.5)
 
-abline(v = c(8.5, 17.5, 26.5),
-       h = c(8.5, 17.5, 26.5),
+abline(v = c(9.5, 17.5, 26.5),
+       h = c(9.5, 17.5, 26.5),
        lwd = 3,
        col = "grey")
 
 axis(side = 1, 
-     at =  c(4.5, 13, 22, 31), 
-     labels = parts, 
+     at =  c(5, 13.5, 22, 31), 
+     labels = parts2, 
      font = 2,
      las = 1,
      cex.axis = 1.5)
 
 axis(side = 2, 
-     at =  c(4.5, 13, 22, 31), 
-     labels = parts, 
+     at =  c(5, 13.5, 22, 31), 
+     labels = parts2, 
      font = 2, 
      las = 3,
      cex.axis = 1.5)
 
 axis(side = 4, 
-     at = 1:dim(congro_overall)[2], 
-     labels = lab_congro, 
+     at = 1:9, 
+     labels = rownames(m)[1:9], 
      las = 2, 
-     cex.axis = 1.2)
+     cex.axis = 1.2, 
+     col.axis = 4, col.ticks = 4)
+axis(side = 4, 
+     at = 10:17, 
+     labels = rownames(m)[10:17], 
+     las = 2, 
+     cex.axis = 1.2,
+     col.axis = 1, col.ticks = 1)
+axis(side = 4, 
+     at = 18:26, 
+     labels = rownames(m)[18:26], 
+     las = 2, 
+     cex.axis = 1.2,
+     col.axis = 3, col.ticks = 3)
+axis(side = 4, 
+     at = 27:35, 
+     labels = rownames(m)[27:35], 
+     las = 2, 
+     cex.axis = 1.2,
+     col.axis = 2, col.ticks = 2)
+
 
 axis(side = 3, 
-     at = 1:dim(congro_overall)[2], 
-     labels = lab_congro, 
+     at = 1:9, 
+     labels = rownames(m)[1:9], 
      las = 2, 
-     cex.axis = 1.2)
+     cex.axis = 1.2, 
+     col.axis = 4, col.ticks = 4)
+axis(side = 3, 
+     at = 10:17, 
+     labels = rownames(m)[10:17], 
+     las = 2, 
+     cex.axis = 1.2,
+     col.axis = 1, col.ticks = 1)
+axis(side = 3, 
+     at = 18:26, 
+     labels = rownames(m)[18:26], 
+     las = 2, 
+     cex.axis = 1.2,
+     col.axis = 3, col.ticks = 3)
+axis(side = 3, 
+     at = 27:35, 
+     labels = rownames(m)[27:35], 
+     las = 2, 
+     cex.axis = 1.2,
+     col.axis = 2, col.ticks = 2)
+
+#axis(side = 4, 
+#     at = 1:dim(congro_overall)[2], 
+#     labels = rownames(congro_overall), 
+#     las = 2, 
+#     cex.axis = 1.2)
+
+#axis(side = 3, 
+#     at = 1:dim(congro_overall)[2], 
+#     labels = rownames(congro_overall), 
+#     las = 2, 
+#     cex.axis = 1.2)
 
 legend(x = 40,
-       y = 35.5,
+       y = 0.5,
        xpd = T,
        legend = round(seq(min(na.omit(c(m))), 
                           max(na.omit(c(m))), 
@@ -1125,14 +1188,14 @@ legend(x = 40,
        pch = 15, 
        cex = 1.2)
 
-text(x = c(rep(4.5, 3), rep(13, 2), 22), 
-     y = c(13, 22, 31, 22, 31, 31),
-     labels = rpls_val, 
+text(y = c(rep(5, 3), rep(13.5, 2), 22), 
+     x = c(13.5, 22, 31, 22, 31, 31),
+     labels = rplso, 
      pos = 3, cex = 1.5)
 
-text(x = c(rep(4.5, 3), rep(13, 2), 22), 
-     y = c(13, 22, 31, 22, 31, 31),
-     labels = p_val,
+text(y = c(rep(5, 3), rep(13.5, 2), 22), 
+     x = c(13.5, 22, 31, 22, 31, 31),
+     labels = p_valo,
      pos = 1, cex = 1.5)
 
 dev.off()
